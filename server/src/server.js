@@ -1,19 +1,16 @@
-﻿import express from 'express'
-import cors from 'cors'
-import dotenv from 'dotenv'
+﻿import { pool } from './db/pool.js'
 
-dotenv.config()
-
-const app = express()
-const PORT = process.env.PORT || 3000
-
-app.use(cors())
-app.use(express.json())
-
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'Server läuft' })
+app.get('/api/health', async (req, res, next) => {
+    try {
+        await pool.query('SELECT 1')
+        res.json({ status: 'ok' })
+    } catch (err) { next(err) }
 })
 
-app.listen(PORT, () => {
-    console.log(`Server läuft auf http://localhost:${PORT}`)
+// immer als letzte Middleware
+app.use((err, req, res, next) => {
+    console.error(err)
+    res.status(err.status || 500).json({
+        error: { code: err.code || 'INTERNAL', message: err.message, fields: err.fields }
+    })
 })
