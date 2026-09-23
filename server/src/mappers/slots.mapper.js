@@ -11,7 +11,7 @@
     };
 }
 
-export function toBookListItem(row) {
+export function toBookListItemDto(row) {
     return {
         id: row.id,
         title: row.title,
@@ -26,7 +26,7 @@ export function toBookListItem(row) {
 
 export function toBookDetail(row) {
     return {
-        ...toBookListItem(row),
+        ...toBookListItemDto(row),
         isbn10: row.isbn10,
         publisher: row.publisher,
         pages: row.pages,
