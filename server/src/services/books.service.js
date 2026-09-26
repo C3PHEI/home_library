@@ -1,6 +1,6 @@
 ﻿import { ValidationError } from '../errors/AppError.js'
 import * as booksRepository from '../repositories/books.repository.js'
-import { toBookListItemWithLocationDto } from '../mappers/books.mapper.js'
+import { toBookListItemWithLocationDto, toFilterOptionsDto } from '../mappers/books.mapper.js'
 
 const ALLOWED_SORTS = ['title', 'author', 'year', 'created']
 const ALLOWED_DIRS = ['asc', 'desc']
@@ -94,4 +94,18 @@ export async function getBooks(query = {}) {
         to,
         items: rows.map(toBookListItemWithLocationDto),
     }
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/books/filters
+// ---------------------------------------------------------------------------
+
+export async function getFilterOptions() {
+    const [authors, languages, years] = await Promise.all([
+        booksRepository.findDistinctAuthors(),
+        booksRepository.findDistinctLanguages(),
+        booksRepository.findDistinctYears(),
+    ])
+
+    return toFilterOptionsDto(authors, languages, years)
 }

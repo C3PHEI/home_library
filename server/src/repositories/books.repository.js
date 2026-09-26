@@ -59,3 +59,36 @@ export async function findBooks(filters, sort, dir, limit, offset) {
     )
     return rows
 }
+
+// Werte für die Filter-Dropdowns, jeweils mit Anzahl Bücher
+export async function findDistinctAuthors() {
+    const { rows } = await pool.query(
+        `SELECT author AS value, count(*)::int AS count
+           FROM book
+          GROUP BY author
+          ORDER BY lower(author)`
+    )
+    return rows
+}
+
+export async function findDistinctLanguages() {
+    const { rows } = await pool.query(
+        `SELECT language AS value, count(*)::int AS count
+           FROM book
+          WHERE language IS NOT NULL
+          GROUP BY language
+          ORDER BY count(*) DESC, language`
+    )
+    return rows
+}
+
+export async function findDistinctYears() {
+    const { rows } = await pool.query(
+        `SELECT published_year AS value, count(*)::int AS count
+           FROM book
+          WHERE published_year IS NOT NULL
+          GROUP BY published_year
+          ORDER BY published_year DESC`
+    )
+    return rows
+}

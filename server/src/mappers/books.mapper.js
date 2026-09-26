@@ -13,3 +13,24 @@ export function toBookListItemWithLocationDto(row) {
         },
     }
 }
+
+// Anzeigenamen für die häufigsten Sprachcodes. Unbekannte Codes zeigen den Code selbst.
+const LANGUAGE_LABELS = {
+    de: 'Deutsch',
+    fr: 'Französisch',
+    en: 'Englisch',
+    it: 'Italienisch',
+    es: 'Spanisch',
+}
+
+export function toFilterOptionsDto(authors, languages, years) {
+    return {
+        authors: authors.map(r => ({ value: r.value, count: r.count })),
+        languages: languages.map(r => ({
+            value: r.value,
+            label: LANGUAGE_LABELS[r.value] ?? r.value,
+            count: r.count,
+        })),
+        years: years.map(r => ({ value: r.value, count: r.count })),
+    }
+}
