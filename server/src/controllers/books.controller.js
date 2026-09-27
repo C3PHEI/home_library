@@ -11,3 +11,9 @@ export async function getFilters(req, res) {
     const result = await booksService.getFilterOptions()
     res.json(result)
 }
+
+// GET /api/books/:id
+export async function getById(req, res) {
+    const result = await booksService.getBookById(req.params.id)
+    res.json(result)
+}

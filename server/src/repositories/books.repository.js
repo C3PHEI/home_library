@@ -92,3 +92,17 @@ export async function findDistinctYears() {
     )
     return rows
 }
+
+export async function findById(id) {
+    const { rows } = await pool.query(
+        `SELECT id, title, author, isbn13, isbn10, publisher, published_year, language, pages,
+                note, cover_path, cover_source, loaned_to,
+                loaned_since::text AS loaned_since,   -- 'YYYY-MM-DD', sonst verschiebt die Zeitzone den Tag
+                created_at, updated_at,
+                shelf_slot_id, slot_label, furniture_id, furniture_name, furniture_type, room
+           FROM book_with_location
+          WHERE id = $1`,
+        [id]
+    )
+    return rows[0] ?? null
+}

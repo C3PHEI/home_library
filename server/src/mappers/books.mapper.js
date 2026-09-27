@@ -1,4 +1,4 @@
-﻿import { toBookListItemDto } from './slots.mapper.js'
+﻿import { toBookListItemDto, toBookDetail } from './slots.mapper.js'
 
 // Listeneintrag + Standort (für die Gesamtliste, dort ist die Reihe nicht vorgegeben)
 export function toBookListItemWithLocationDto(row) {
@@ -32,5 +32,19 @@ export function toFilterOptionsDto(authors, languages, years) {
             count: r.count,
         })),
         years: years.map(r => ({ value: r.value, count: r.count })),
+    }
+}
+
+export function toBookDetailWithLocationDto(row) {
+    return {
+        ...toBookDetail(row),
+        location: {
+            slotId: row.shelf_slot_id,
+            slotLabel: row.slot_label,
+            furnitureId: row.furniture_id,
+            furnitureName: row.furniture_name,
+            furnitureType: row.furniture_type,
+            room: row.room,
+        },
     }
 }

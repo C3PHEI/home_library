@@ -1,11 +1,12 @@
 ﻿import { ValidationError } from '../errors/AppError.js'
 import * as booksRepository from '../repositories/books.repository.js'
-import { toBookListItemWithLocationDto, toFilterOptionsDto } from '../mappers/books.mapper.js'
+import { toBookListItemWithLocationDto, toFilterOptionsDto, toBookDetailWithLocationDto } from '../mappers/books.mapper.js'
 
 const ALLOWED_SORTS = ['title', 'author', 'year', 'created']
 const ALLOWED_DIRS = ['asc', 'desc']
 const DEFAULT_LIMIT = 25
 const MAX_LIMIT = 100
+const MAX_DB_INT = 2147483647
 
 // ---------------------------------------------------------------------------
 // Helper
@@ -30,6 +31,17 @@ function parsePositiveInt(value, defaultValue, fieldName) {
         throw new ValidationError({ [fieldName]: 'Muss eine positive Ganzzahl sein' })
     }
     return number
+}
+
+function parseId(value) {
+    if (typeof value !== 'string' || !/^\d+$/.test(value)) {
+        throw new ValidationError({ id: 'Muss eine positive Ganzzahl sein' })
+    }
+    const id = Number(value)
+    if (id <= 0 || id > MAX_DB_INT) {
+        throw new ValidationError({ id: 'Muss eine positive Ganzzahl sein' })
+    }
+    return id
 }
 
 function parseFilters(query) {
@@ -108,4 +120,17 @@ export async function getFilterOptions() {
     ])
 
     return toFilterOptionsDto(authors, languages, years)
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/books/:id
+// ---------------------------------------------------------------------------
+
+export async function getBookById(idParam) {
+    const id = parseId(idParam)
+
+    const row = await booksRepository.findById(id)
+    if (!row) throw new NotFoundError(`Buch ${id} nicht gefunden`)
+
+    return toBookDetailWithLocationDto(row)
 }
