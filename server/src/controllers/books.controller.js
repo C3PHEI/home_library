@@ -35,3 +35,9 @@ export async function update(req, res) {
     const result = await booksService.updateBook(req.params.id, req.body)
     res.json(result)
 }
+
+// DELETE /api/books/:id
+export async function remove(req, res) {
+    await booksService.deleteBook(req.params.id)
+    res.status(204).end()
+}

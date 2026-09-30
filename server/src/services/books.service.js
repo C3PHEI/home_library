@@ -377,3 +377,11 @@ export async function updateBook(idParam, body) {
     const row = await booksRepository.findById(id)
     return { book: toBookDetailWithLocationDto(row), warnings }
 }
+
+// DELETE /api/books/:id
+export async function deleteBook(idParam) {
+    const id = parseId(idParam)
+
+    const deleted = await booksRepository.deleteBook(id)
+    if (!deleted) throw new NotFoundError(`Buch ${id} nicht gefunden`)
+}

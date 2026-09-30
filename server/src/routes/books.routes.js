@@ -9,5 +9,6 @@ router.get('/:id', booksController.getById)          // GET /api/books/:id
 router.post('/', booksController.create)   // POST /api/books
 router.patch('/:id/location', booksController.move)  // PATCH /api/books/:id/location
 router.patch('/:id', booksController.update)         // PATCH /api/books/:id
+router.delete('/:id', booksController.remove)        // DELETE /api/books/:id
 
 export default router

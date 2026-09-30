@@ -176,3 +176,9 @@ export async function updateBook(id, changes) {
     )
     return rowCount > 0
 }
+
+// Buch endgültig löschen. Gibt false zurück, wenn es das Buch nicht gibt.
+export async function deleteBook(id) {
+    const { rowCount } = await pool.query('DELETE FROM book WHERE id = $1', [id])
+    return rowCount > 0
+}
