@@ -2,6 +2,7 @@
 import * as booksRepository from '../repositories/books.repository.js'
 import { normalizeIsbn } from '../validation/isbn.js'
 import { toBookListItemWithLocationDto, toFilterOptionsDto, toBookDetailWithLocationDto } from '../mappers/books.mapper.js'
+import { toCsv } from '../utils/csv.js'
 
 const ALLOWED_SORTS = ['title', 'author', 'year', 'created']
 const ALLOWED_DIRS = ['asc', 'desc']
@@ -384,4 +385,29 @@ export async function deleteBook(idParam) {
 
     const deleted = await booksRepository.deleteBook(id)
     if (!deleted) throw new NotFoundError(`Buch ${id} nicht gefunden`)
+}
+
+// GET /api/books/export.csv
+const CSV_COLUMNS = [
+    { header: 'ID', value: r => r.id },
+    { header: 'Titel', value: r => r.title },
+    { header: 'Autor', value: r => r.author },
+    { header: 'ISBN-13', value: r => r.isbn13 },
+    { header: 'ISBN-10', value: r => r.isbn10 },
+    { header: 'Verlag', value: r => r.publisher },
+    { header: 'Erscheinungsjahr', value: r => r.published_year },
+    { header: 'Sprache', value: r => r.language },
+    { header: 'Seiten', value: r => r.pages },
+    { header: 'Notiz', value: r => r.note },
+    { header: 'Raum', value: r => r.room },
+    { header: 'Möbel', value: r => r.furniture_name },
+    { header: 'Reihe', value: r => r.slot_label },
+    { header: 'Ausgeliehen an', value: r => r.loaned_to },
+    { header: 'Ausgeliehen seit', value: r => r.loaned_since },
+    { header: 'Erfasst am', value: r => r.created_at },
+]
+
+export async function exportBooksCsv() {
+    const rows = await booksRepository.findAllForExport()
+    return toCsv(CSV_COLUMNS, rows)
 }

@@ -182,3 +182,15 @@ export async function deleteBook(id) {
     const { rowCount } = await pool.query('DELETE FROM book WHERE id = $1', [id])
     return rowCount > 0
 }
+
+// Alle Bücher mit Standort für den CSV-Export, sortiert wie ein Inventar
+export async function findAllForExport() {
+    const { rows } = await pool.query(
+        `SELECT id, title, author, isbn13, isbn10, publisher, published_year, language, pages,
+                note, loaned_to, loaned_since::text AS loaned_since, created_at,
+                room, furniture_name, slot_label
+           FROM book_with_location
+          ORDER BY room NULLS LAST, furniture_name, slot_sort_order, lower(title), id`
+    )
+    return rows
+}

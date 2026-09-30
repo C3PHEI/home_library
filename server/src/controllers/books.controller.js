@@ -41,3 +41,14 @@ export async function remove(req, res) {
     await booksService.deleteBook(req.params.id)
     res.status(204).end()
 }
+
+// GET /api/books/export.csv
+export async function exportCsv(req, res) {
+    const csv = await booksService.exportBooksCsv()
+    const date = new Date().toISOString().slice(0, 10)
+    res.set({
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': `attachment; filename="bibliothek-${date}.csv"`,
+    })
+    res.send(csv)
+}
