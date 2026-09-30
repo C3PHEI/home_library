@@ -106,3 +106,33 @@ export async function findById(id) {
     )
     return rows[0] ?? null
 }
+
+export async function slotExists(slotId) {
+    const { rows } = await pool.query('SELECT 1 FROM shelf_slot WHERE id = $1', [slotId])
+    return rows.length > 0
+}
+
+export async function findByIsbn13(isbn13) {
+    const { rows } = await pool.query(
+        `SELECT id, title, author, slot_label, furniture_name, room
+           FROM book_with_location
+          WHERE isbn13 = $1
+          ORDER BY id`,
+        [isbn13]
+    )
+    return rows
+}
+
+export async function insertBook(data) {
+    const { rows } = await pool.query(
+        `INSERT INTO book (title, author, isbn13, isbn10, publisher, published_year,
+                           language, pages, note, shelf_slot_id)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+         RETURNING id`,
+        [
+            data.title, data.author, data.isbn13, data.isbn10, data.publisher,
+            data.publishedYear, data.language, data.pages, data.note, data.shelfSlotId,
+        ]
+    )
+    return rows[0].id
+}

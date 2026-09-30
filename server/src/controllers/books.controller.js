@@ -17,3 +17,9 @@ export async function getById(req, res) {
     const result = await booksService.getBookById(req.params.id)
     res.json(result)
 }
+
+// POST /api/books
+export async function create(req, res) {
+    const result = await booksService.createBook(req.body)
+    res.status(201).location(`/api/books/${result.book.id}`).json(result)
+}

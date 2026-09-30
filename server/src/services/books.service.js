@@ -1,5 +1,6 @@
-﻿import { ValidationError } from '../errors/AppError.js'
+﻿import { NotFoundError, ValidationError } from '../errors/AppError.js'
 import * as booksRepository from '../repositories/books.repository.js'
+import { normalizeIsbn } from '../validation/isbn.js'
 import { toBookListItemWithLocationDto, toFilterOptionsDto, toBookDetailWithLocationDto } from '../mappers/books.mapper.js'
 
 const ALLOWED_SORTS = ['title', 'author', 'year', 'created']
@@ -133,4 +134,124 @@ export async function getBookById(idParam) {
     if (!row) throw new NotFoundError(`Buch ${id} nicht gefunden`)
 
     return toBookDetailWithLocationDto(row)
+}
+
+// ---------------------------------------------------------------------------
+// POST /api/books
+// ---------------------------------------------------------------------------
+const MAX_TEXT = 500
+const MAX_NOTE = 5000
+
+function optionalText(body, key, maxLength, errors) {
+    const value = body[key]
+    if (value === undefined || value === null) return null
+    if (typeof value !== 'string') {
+        errors[key] = 'Muss ein Text sein'
+        return null
+    }
+    const trimmed = value.trim()
+    if (trimmed.length > maxLength) {
+        errors[key] = `Maximal ${maxLength} Zeichen`
+        return null
+    }
+    return trimmed === '' ? null : trimmed
+}
+
+function requiredText(body, key, errors) {
+    const value = body[key]
+    if (typeof value !== 'string' || value.trim() === '') {
+        errors[key] = 'Pflichtfeld'
+        return null
+    }
+    const trimmed = value.trim()
+    if (trimmed.length > MAX_TEXT) {
+        errors[key] = `Maximal ${MAX_TEXT} Zeichen`
+        return null
+    }
+    return trimmed
+}
+
+function optionalInt(body, key, min, max, errors) {
+    const value = body[key]
+    if (value === undefined || value === null || value === '') return null
+    if (!Number.isInteger(value) || value < min || value > max) {
+        errors[key] = `Ganzzahl zwischen ${min} und ${max}`
+        return null
+    }
+    return value
+}
+
+export async function createBook(body) {
+    if (body === null || typeof body !== 'object' || Array.isArray(body)) {
+        throw new ValidationError({ body: 'JSON-Objekt erwartet' })
+    }
+
+    const errors = {}
+
+    const title = requiredText(body, 'title', errors)
+    const author = requiredText(body, 'author', errors)
+
+    const shelfSlotId = body.shelfSlotId
+    if (shelfSlotId === undefined || shelfSlotId === null) {
+        errors.shelfSlotId = 'Pflichtfeld'
+    } else if (!Number.isInteger(shelfSlotId) || shelfSlotId <= 0 || shelfSlotId > MAX_DB_INT) {
+        errors.shelfSlotId = 'Muss eine positive Ganzzahl sein'
+    }
+
+    let isbn13 = null
+    let isbn10 = null
+    if (body.isbn !== undefined && body.isbn !== null && body.isbn !== '') {
+        const normalized = typeof body.isbn === 'string' ? normalizeIsbn(body.isbn) : null
+        if (normalized) {
+            isbn13 = normalized.isbn13
+            isbn10 = normalized.isbn10
+        } else {
+            errors.isbn = 'Ungültige ISBN (Prüfziffer stimmt nicht)'
+        }
+    }
+
+    const publisher = optionalText(body, 'publisher', MAX_TEXT, errors)
+    const note = optionalText(body, 'note', MAX_NOTE, errors)
+    const publishedYear = optionalInt(body, 'publishedYear', 1400, 2100, errors)
+    const pages = optionalInt(body, 'pages', 1, MAX_DB_INT, errors)
+
+    let language = optionalText(body, 'language', 3, errors)
+    if (language !== null) {
+        language = language.toLowerCase()
+        if (!/^[a-z]{2,3}$/.test(language)) {
+            errors.language = 'Sprachcode wie de, fr, en'
+        }
+    }
+
+    if (Object.keys(errors).length > 0) {
+        throw new ValidationError(errors)
+    }
+
+    if (!(await booksRepository.slotExists(shelfSlotId))) {
+        throw new ValidationError({ shelfSlotId: 'Diese Reihe gibt es nicht' })
+    }
+
+    // Duplikat-Warnung (FA-14): kein Fehler, das Buch wird trotzdem gespeichert
+    const warnings = []
+    if (isbn13) {
+        const existing = await booksRepository.findByIsbn13(isbn13)
+        if (existing.length > 0) {
+            warnings.push({
+                code: 'DUPLICATE_ISBN',
+                existing: existing.map(row => ({
+                    bookId: row.id,
+                    title: row.title,
+                    location: `${row.furniture_name}, ${row.slot_label}`,
+                })),
+            })
+        }
+    }
+
+    const id = await booksRepository.insertBook({
+        title, author, isbn13, isbn10, publisher, publishedYear,
+        language, pages, note, shelfSlotId,
+    })
+
+    const row = await booksRepository.findById(id)
+    return { book: toBookDetailWithLocationDto(row), warnings }
 }
