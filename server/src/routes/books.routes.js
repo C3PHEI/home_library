@@ -7,5 +7,6 @@ router.get('/', booksController.getAll)   // GET /api/books?sort=title&dir=asc&p
 router.get('/filters', booksController.getFilters)   // GET /api/books/filters
 router.get('/:id', booksController.getById)          // GET /api/books/:id
 router.post('/', booksController.create)   // POST /api/books
+router.patch('/:id/location', booksController.move)  // PATCH /api/books/:id/location
 
 export default router

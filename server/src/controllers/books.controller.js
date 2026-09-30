@@ -23,3 +23,9 @@ export async function create(req, res) {
     const result = await booksService.createBook(req.body)
     res.status(201).location(`/api/books/${result.book.id}`).json(result)
 }
+
+// PATCH /api/books/:id/location
+export async function move(req, res) {
+    const result = await booksService.moveBook(req.params.id, req.body)
+    res.json(result)
+}

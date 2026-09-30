@@ -255,3 +255,25 @@ export async function createBook(body) {
     const row = await booksRepository.findById(id)
     return { book: toBookDetailWithLocationDto(row), warnings }
 }
+
+// Body: { shelfSlotId }
+export async function moveBook(idParam, body) {
+    const id = parseId(idParam)
+
+    const slotId = body?.shelfSlotId
+    if (slotId === undefined || slotId === null) {
+        throw new ValidationError({ shelfSlotId: 'Pflichtfeld' })
+    }
+    if (!Number.isInteger(slotId) || slotId <= 0 || slotId > MAX_DB_INT) {
+        throw new ValidationError({ shelfSlotId: 'Muss eine positive Ganzzahl sein' })
+    }
+    if (!(await booksRepository.slotExists(slotId))) {
+        throw new ValidationError({ shelfSlotId: 'Diese Reihe gibt es nicht' })
+    }
+
+    const updated = await booksRepository.updateBookSlot(id, slotId)
+    if (!updated) throw new NotFoundError(`Buch ${id} nicht gefunden`)
+
+    const row = await booksRepository.findById(id)
+    return toBookDetailWithLocationDto(row)
+}

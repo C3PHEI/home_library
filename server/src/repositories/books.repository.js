@@ -136,3 +136,11 @@ export async function insertBook(data) {
     )
     return rows[0].id
 }
+
+export async function updateBookSlot(id, slotId) {
+    const { rowCount } = await pool.query(
+        'UPDATE book SET shelf_slot_id = $1 WHERE id = $2',
+        [slotId, id]
+    )
+    return rowCount > 0
+}
