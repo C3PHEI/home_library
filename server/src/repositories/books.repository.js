@@ -144,3 +144,35 @@ export async function updateBookSlot(id, slotId) {
     )
     return rowCount > 0
 }
+
+// Whitelist: nur diese Spalten dürfen per PATCH geändert werden
+const UPDATABLE_COLUMNS = {
+    title: 'title',
+    author: 'author',
+    isbn13: 'isbn13',
+    isbn10: 'isbn10',
+    publisher: 'publisher',
+    publishedYear: 'published_year',
+    language: 'language',
+    pages: 'pages',
+    note: 'note',
+}
+
+// Ändert nur die übergebenen Felder. Gibt false zurück, wenn es das Buch nicht gibt.
+export async function updateBook(id, changes) {
+    const sets = []
+    const params = []
+    for (const [key, value] of Object.entries(changes)) {
+        const column = UPDATABLE_COLUMNS[key]
+        if (!column) continue
+        params.push(value)
+        sets.push(`${column} = $${params.length}`)
+    }
+
+    params.push(id)
+    const { rowCount } = await pool.query(
+        `UPDATE book SET ${sets.join(', ')} WHERE id = $${params.length}`,
+        params
+    )
+    return rowCount > 0
+}

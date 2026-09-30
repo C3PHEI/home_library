@@ -29,3 +29,9 @@ export async function move(req, res) {
     const result = await booksService.moveBook(req.params.id, req.body)
     res.json(result)
 }
+
+// PATCH /api/books/:id
+export async function update(req, res) {
+    const result = await booksService.updateBook(req.params.id, req.body)
+    res.json(result)
+}

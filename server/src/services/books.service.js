@@ -277,3 +277,103 @@ export async function moveBook(idParam, body) {
     const row = await booksRepository.findById(id)
     return toBookDetailWithLocationDto(row)
 }
+
+// PATCH /api/books/:id
+// Body: beliebige Teilmenge von title, author, isbn, publisher, publishedYear,
+//       language, pages, note. Nur mitgeschickte Felder werden geändert.
+//       null oder "" leert ein optionales Feld. Umbuchen: PATCH .../location
+
+const PATCHABLE_FIELDS = ['title', 'author', 'isbn', 'publisher', 'publishedYear', 'language', 'pages', 'note']
+
+export async function updateBook(idParam, body) {
+    const id = parseId(idParam)
+
+    if (body === null || typeof body !== 'object' || Array.isArray(body)) {
+        throw new ValidationError({ body: 'JSON-Objekt erwartet' })
+    }
+
+    const errors = {}
+    const has = key => Object.hasOwn(body, key)
+
+    for (const key of Object.keys(body)) {
+        if (!PATCHABLE_FIELDS.includes(key)) {
+            errors[key] = key === 'shelfSlotId'
+                ? 'Zum Umbuchen PATCH /api/books/:id/location benutzen'
+                : 'Feld nicht erlaubt'
+        }
+    }
+
+    const changes = {}
+
+    // Pflichtfelder: dürfen nicht leer werden
+    if (has('title')) {
+        const value = requiredText(body, 'title', errors)
+        if (value !== null) changes.title = value
+    }
+    if (has('author')) {
+        const value = requiredText(body, 'author', errors)
+        if (value !== null) changes.author = value
+    }
+
+    // ISBN: gültig -> beide Formen setzen, null/"" -> beide leeren
+    if (has('isbn')) {
+        if (body.isbn === null || body.isbn === '') {
+            changes.isbn13 = null
+            changes.isbn10 = null
+        } else {
+            const normalized = typeof body.isbn === 'string' ? normalizeIsbn(body.isbn) : null
+            if (normalized) {
+                changes.isbn13 = normalized.isbn13
+                changes.isbn10 = normalized.isbn10
+            } else {
+                errors.isbn = 'Ungültige ISBN (Prüfziffer stimmt nicht)'
+            }
+        }
+    }
+
+    // Optionale Felder: null/"" leert sie
+    if (has('publisher')) changes.publisher = optionalText(body, 'publisher', MAX_TEXT, errors)
+    if (has('note')) changes.note = optionalText(body, 'note', MAX_NOTE, errors)
+    if (has('publishedYear')) changes.publishedYear = optionalInt(body, 'publishedYear', 1400, 2100, errors)
+    if (has('pages')) changes.pages = optionalInt(body, 'pages', 1, MAX_DB_INT, errors)
+
+    if (has('language')) {
+        let language = optionalText(body, 'language', 3, errors)
+        if (language !== null) {
+            language = language.toLowerCase()
+            if (!/^[a-z]{2,3}$/.test(language)) {
+                errors.language = 'Sprachcode wie de, fr, en'
+            }
+        }
+        changes.language = language
+    }
+
+    if (Object.keys(errors).length > 0) {
+        throw new ValidationError(errors)
+    }
+    if (Object.keys(changes).length === 0) {
+        throw new ValidationError({ body: 'Keine Felder zum Ändern angegeben' })
+    }
+
+    // Duplikat-Warnung, wenn die ISBN geändert wird (das Buch selbst zählt nicht)
+    const warnings = []
+    if (changes.isbn13) {
+        const existing = (await booksRepository.findByIsbn13(changes.isbn13)).filter(row => row.id !== id)
+        if (existing.length > 0) {
+            warnings.push({
+                code: 'DUPLICATE_ISBN',
+                existing: existing.map(row => ({
+                    bookId: row.id,
+                    title: row.title,
+                    location: `${row.furniture_name}, ${row.slot_label}`,
+                })),
+            })
+        }
+    }
+
+    const updated = await booksRepository.updateBook(id, changes)
+    if (!updated) throw new NotFoundError(`Buch ${id} nicht gefunden`)
+
+    const row = await booksRepository.findById(id)
+    return { book: toBookDetailWithLocationDto(row), warnings }
+}
