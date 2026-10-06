@@ -42,6 +42,18 @@ export async function remove(req, res) {
     res.status(204).end()
 }
 
+// PUT /api/books/:id/cover   Body: { "coverTempId": "..." }
+export async function setCover(req, res) {
+    const result = await booksService.setBookCover(req.params.id, req.body)
+    res.json(result)
+}
+
+// DELETE /api/books/:id/cover
+export async function removeCover(req, res) {
+    const result = await booksService.deleteBookCover(req.params.id)
+    res.json(result)
+}
+
 // GET /api/books/export.csv
 export async function exportCsv(req, res) {
     const csv = await booksService.exportBooksCsv()

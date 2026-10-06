@@ -9,6 +9,8 @@ router.get('/filters', booksController.getFilters)   // GET /api/books/filters
 router.get('/:id', booksController.getById)          // GET /api/books/:id
 router.post('/', booksController.create)   // POST /api/books
 router.patch('/:id/location', booksController.move)  // PATCH /api/books/:id/location
+router.put('/:id/cover', booksController.setCover)       // PUT /api/books/:id/cover
+router.delete('/:id/cover', booksController.removeCover) // DELETE /api/books/:id/cover
 router.patch('/:id', booksController.update)         // PATCH /api/books/:id
 router.delete('/:id', booksController.remove)        // DELETE /api/books/:id
 

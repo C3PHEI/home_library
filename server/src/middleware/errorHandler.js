@@ -9,6 +9,18 @@ export function errorHandler(err, req, res, next) {
         })
     }
 
+    // Upload-Fehler von multer (Bild zu gross, falscher Feldname ...)
+    if (err.name === 'MulterError') {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            return res.status(413).json({
+                error: { code: 'FILE_TOO_LARGE', message: 'Bild ist grösser als 10 MB', fields: { file: 'Maximal 10 MB' } }
+            })
+        }
+        return res.status(400).json({
+            error: { code: 'VALIDATION', message: 'Upload ungültig', fields: { file: 'Genau ein Bild im Feld "file" schicken' } }
+        })
+    }
+
     // Kaputtes JSON im Request-Body
     if (err.type === 'entity.parse.failed') {
         return res.status(400).json({

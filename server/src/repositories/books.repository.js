@@ -177,9 +177,24 @@ export async function updateBook(id, changes) {
     return rowCount > 0
 }
 
-// Buch endgültig löschen. Gibt false zurück, wenn es das Buch nicht gibt.
+// Gibt die gelöschte Zeile zurück (für cover_path), oder null wenn es das Buch nicht gab
 export async function deleteBook(id) {
-    const { rowCount } = await pool.query('DELETE FROM book WHERE id = $1', [id])
+    const { rows } = await pool.query('DELETE FROM book WHERE id = $1 RETURNING id, cover_path', [id])
+    return rows[0] ?? null
+}
+
+// { cover_path } oder null, wenn es das Buch nicht gibt
+export async function findCover(id) {
+    const { rows } = await pool.query('SELECT cover_path FROM book WHERE id = $1', [id])
+    return rows[0] ?? null
+}
+
+// coverPath und coverSource beide null = Cover entfernen
+export async function updateCover(id, coverPath, coverSource) {
+    const { rowCount } = await pool.query(
+        'UPDATE book SET cover_path = $2, cover_source = $3 WHERE id = $1',
+        [id, coverPath, coverSource]
+    )
     return rowCount > 0
 }
 

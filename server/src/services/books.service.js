@@ -3,6 +3,7 @@ import * as booksRepository from '../repositories/books.repository.js'
 import { normalizeIsbn } from '../validation/isbn.js'
 import { toBookListItemWithLocationDto, toFilterOptionsDto, toBookDetailWithLocationDto } from '../mappers/books.mapper.js'
 import { toCsv } from '../utils/csv.js'
+import * as coverStore from './coverStore.js'
 
 const ALLOWED_SORTS = ['title', 'author', 'year', 'created']
 const ALLOWED_DIRS = ['asc', 'desc']
@@ -224,6 +225,10 @@ export async function createBook(body) {
         }
     }
 
+    // Cover (freiwillig): tempId aus GET /api/isbn oder POST /api/covers/upload.
+    // Ohne coverTempId wird das Buch ohne Cover gespeichert.
+    const coverTempId = readCoverTempId(body, errors)
+
     if (Object.keys(errors).length > 0) {
         throw new ValidationError(errors)
     }
@@ -231,6 +236,7 @@ export async function createBook(body) {
     if (!(await booksRepository.slotExists(shelfSlotId))) {
         throw new ValidationError({ shelfSlotId: 'Diese Reihe gibt es nicht' })
     }
+    await assertTempCoverExists(coverTempId)
 
     // Duplikat-Warnung (FA-14): kein Fehler, das Buch wird trotzdem gespeichert
     const warnings = []
@@ -253,9 +259,91 @@ export async function createBook(body) {
         language, pages, note, shelfSlotId,
     })
 
+    // Zuerst das Buch, dann das Cover. Klappt das Cover nicht, ist das Buch
+    // trotzdem gespeichert und das Cover kann später ergänzt werden.
+    if (coverTempId) {
+        try {
+            const { coverPath, coverSource } = await coverStore.commitTemp(coverTempId, id)
+            await booksRepository.updateCover(id, coverPath, coverSource)
+        } catch (err) {
+            console.error(`Cover für Buch ${id} nicht gespeichert:`, err.message)
+            warnings.push({ code: 'COVER_NOT_SAVED', message: 'Buch gespeichert, Cover aber nicht' })
+        }
+    }
+
     const row = await booksRepository.findById(id)
     return { book: toBookDetailWithLocationDto(row), warnings }
 }
+
+// ---------------------------------------------------------------------------
+// Cover-Helfer
+// ---------------------------------------------------------------------------
+
+function readCoverTempId(body, errors) {
+    const value = body.coverTempId
+    if (value === undefined || value === null || value === '') return null
+    if (!coverStore.isValidTempId(value)) {
+        errors.coverTempId = 'Ungültige Cover-ID'
+        return null
+    }
+    return value
+}
+
+async function assertTempCoverExists(coverTempId) {
+    if (coverTempId && !(await coverStore.tempExists(coverTempId))) {
+        throw new ValidationError({ coverTempId: 'Cover nicht mehr vorhanden, bitte neu auswählen oder hochladen' })
+    }
+}
+
+// Dateien löschen darf das Ergebnis nicht verhindern: der Datensatz ist schon
+// geändert, im schlimmsten Fall bleibt eine verwaiste Datei liegen.
+async function removeCoverFilesSafe(coverPath) {
+    if (!coverPath) return
+    try {
+        await coverStore.removeCoverFiles(coverPath)
+    } catch (err) {
+        console.warn(`Cover-Datei ${coverPath} nicht gelöscht:`, err.message)
+    }
+}
+
+// PUT /api/books/:id/cover   Body: { coverTempId }
+// Cover ersetzen oder nachträglich hinzufügen
+export async function setBookCover(idParam, body) {
+    const id = parseId(idParam)
+    const errors = {}
+    const coverTempId = readCoverTempId(body ?? {}, errors)
+    if (!coverTempId && !errors.coverTempId) errors.coverTempId = 'Pflichtfeld'
+    if (Object.keys(errors).length > 0) throw new ValidationError(errors)
+
+    const current = await booksRepository.findCover(id)
+    if (!current) throw new NotFoundError(`Buch ${id} nicht gefunden`)
+    await assertTempCoverExists(coverTempId)
+
+    const { coverPath, coverSource } = await coverStore.commitTemp(coverTempId, id)
+    await booksRepository.updateCover(id, coverPath, coverSource)
+    await removeCoverFilesSafe(current.cover_path)   // altes Cover erst jetzt löschen
+
+    const row = await booksRepository.findById(id)
+    return toBookDetailWithLocationDto(row)
+}
+
+// DELETE /api/books/:id/cover -> zurück zum Platzhalter
+export async function deleteBookCover(idParam) {
+    const id = parseId(idParam)
+
+    const current = await booksRepository.findCover(id)
+    if (!current) throw new NotFoundError(`Buch ${id} nicht gefunden`)
+
+    if (current.cover_path) {
+        await booksRepository.updateCover(id, null, null)
+        await removeCoverFilesSafe(current.cover_path)
+    }
+
+    const row = await booksRepository.findById(id)
+    return toBookDetailWithLocationDto(row)
+}
+
+
 
 // Body: { shelfSlotId }
 export async function moveBook(idParam, body) {
@@ -383,8 +471,11 @@ export async function updateBook(idParam, body) {
 export async function deleteBook(idParam) {
     const id = parseId(idParam)
 
+    // Zuerst der Datensatz, danach die Dateien (siehe Plan)
     const deleted = await booksRepository.deleteBook(id)
     if (!deleted) throw new NotFoundError(`Buch ${id} nicht gefunden`)
+
+    await removeCoverFilesSafe(deleted.cover_path)
 }
 
 // GET /api/books/export.csv

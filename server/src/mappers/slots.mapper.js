@@ -19,7 +19,7 @@ export function toBookListItemDto(row) {
         publishedYear: row.published_year,
         language: row.language,
         isbn13: row.isbn13,
-        coverThumbUrl: row.cover_path ? `/covers/${row.id}_thumb.webp` : null,
+        coverThumbUrl: row.cover_path ? `/covers/${row.cover_path.replace(/\.webp$/, '_thumb.webp')}` : null,
         loanedTo: row.loaned_to,
     };
 }

@@ -3,6 +3,7 @@ import * as isbnCacheRepository from '../repositories/isbnCache.repository.js'
 import * as booksRepository from '../repositories/books.repository.js'
 import { cleanIsbn, normalizeIsbn } from '../validation/isbn.js'
 import { lookupIsbn } from './isbnLookup/index.js'
+import * as coverStore from './coverStore.js'
 
 // ---------------------------------------------------------------------------
 // GET /api/isbn/:isbn?refresh=true
@@ -32,7 +33,11 @@ export async function lookup(isbnParam, query = {}) {
     }
 
     // Immer frisch aus der DB: steht das Buch schon im Regal? (FA-14)
-    const existingRows = await booksRepository.findByIsbn13(isbn13)
+    // Gleichzeitig das Cover vorläufig herunterladen.
+    const [existingRows, cover] = await Promise.all([
+        booksRepository.findByIsbn13(isbn13),
+        prepareCover(entry.payload.cover),
+    ])
 
     return {
         isbn13,
@@ -43,12 +48,27 @@ export async function lookup(isbnParam, query = {}) {
         fetchedAt: entry.fetched_at,
         attempts: entry.payload.attempts,
         data: entry.payload.data,
-        cover: entry.payload.cover,
+        cover,
         existing: existingRows.map(row => ({
             bookId: row.id,
             title: row.title,
             location: `${row.furniture_name}, ${row.slot_label}`,
         })),
+    }
+}
+
+// Cover nach covers/tmp laden, damit das Frontend eine Vorschau zeigen kann.
+// Fest gespeichert wird es erst, wenn die tempId bei POST /api/books mitkommt.
+// Wird das Cover nicht gewählt, löscht der Aufräum-Job es nach 24 Stunden.
+async function prepareCover(remote) {
+    if (!remote?.url) return null
+    try {
+        const tempId = await coverStore.downloadToTemp(remote.url, remote.source)
+        return { tempId, ...coverStore.tempUrls(tempId), source: remote.source, originalUrl: remote.url }
+    } catch (err) {
+        // Kein Cover ist kein Fehler: die Buchdaten kommen trotzdem
+        console.warn(`Cover von ${remote.source} nicht geladen: ${err.message}`)
+        return null
     }
 }
 
@@ -59,11 +79,12 @@ async function fetchFromSources(isbn13, isbn10) {
     const payload = {
         attempts,
         data: result?.data ?? null,
-        cover: result?.coverUrl ? { url: result.coverUrl, source } : null,
+        cover: result?.coverUrl ? { url: result.coverUrl, source: result.coverSource } : null,
     }
     const entry = { found: source !== null, source, payload, fetched_at: new Date() }
 
     // "Nicht gefunden" nur speichern, wenn alle Quellen sauber geantwortet haben.
+    // Bei Timeout oder Fehler beim nächsten Mal nochmals versuchen.
     const hadFailure = attempts.some(a => a.status === 'timeout' || a.status === 'error')
     if (entry.found || !hadFailure) {
         try {
