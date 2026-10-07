@@ -15,7 +15,7 @@ export function toBookListItemWithLocationDto(row) {
 }
 
 // Anzeigenamen für die häufigsten Sprachcodes. Unbekannte Codes zeigen den Code selbst.
-const LANGUAGE_LABELS = {
+export const LANGUAGE_LABELS = {
     de: 'Deutsch',
     fr: 'Französisch',
     en: 'Englisch',
