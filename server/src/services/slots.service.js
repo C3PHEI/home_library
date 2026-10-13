@@ -12,7 +12,7 @@ const MAX_LIMIT = 100;
 
 function validateShelfId(shelfId) {
     if (!Number.isInteger(shelfId) || shelfId <= 0) {
-        throw new ValidationError("Ungültige Fach-ID");
+        throw new ValidationError({ id: 'Muss eine positive Ganzzahl sein' })
     }
 }
 
@@ -21,7 +21,7 @@ function parsePositiveInt(value, defaultValue, fieldName) {
 
     const number = Number(value);
     if (!Number.isInteger(number) || number <= 0) {
-        throw new ValidationError(`Ungültiger Wert für ${fieldName}`);
+        throw new ValidationError({ [fieldName]: 'Ungültiger Wert' })
     }
     return number;
 }
@@ -48,7 +48,7 @@ export async function getSlotBooks(shelfId, query = {}) {
 
     const sort = query.sort ?? "title";
     if (!ALLOWED_SORTS.includes(sort)) {
-        throw new ValidationError("Ungültige Sortierung");
+        throw new ValidationError({ sort: 'Ungültige Sortierung' })
     }
 
     const page = parsePositiveInt(query.page, 1, "page");
