@@ -24,6 +24,7 @@ server/covers/
 .vscode/*
 !.vscode/extensions.json
 .idea
+node_modules
 .DS_Store
 *.suo
 *.ntvs*
