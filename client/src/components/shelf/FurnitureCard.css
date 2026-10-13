@@ -1,0 +1,79 @@
+﻿.furniture-card {
+    box-sizing: border-box;
+    padding: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.furniture-card-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.furniture-name {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.furniture-count {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.furniture-empty {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.slot-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+/* Eine Reihe: 44 px hoch, damit sie auf dem Handy gut antippbar ist */
+.slot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    height: 44px;
+    box-sizing: border-box;
+    padding: 0 11px;
+    border-radius: 3px;
+    background: var(--slot-filled);
+    border: 1px solid var(--slot-filled-border);
+    color: var(--text);
+    font-size: 13px;
+    transition: background-color 120ms, border-color 120ms;
+}
+.slot:hover {
+    color: var(--text);
+    background: var(--slot-filled-hover);
+    border-color: var(--accent);
+}
+
+.slot-count {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--slot-count);
+}
+
+.slot-empty {
+    background: var(--slot-empty);
+    border-style: dashed;
+    border-color: var(--slot-empty-border);
+    color: var(--text-muted);
+}
+.slot-empty:hover {
+    color: var(--text);
+    background: var(--slot-empty-hover);
+    border-color: var(--text-muted);
+}
+.slot-empty .slot-count { color: inherit; }

@@ -1,0 +1,30 @@
+﻿.legend {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legend-swatch {
+    width: 14px;
+    height: 14px;
+    box-sizing: border-box;
+    border-radius: 2px;
+}
+
+.legend-swatch-filled {
+    background: var(--slot-filled);
+    border: 1px solid var(--slot-filled-border);
+}
+
+.legend-swatch-empty {
+    background: var(--slot-empty);
+    border: 1px dashed var(--slot-empty-border);
+}
