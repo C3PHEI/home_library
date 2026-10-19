@@ -5,8 +5,11 @@ export default function PlaceholderPage({ title }) {
     return (
         <div className="page">
             <h1 className="page-title">{title}</h1>
-            <p className="page-lead">
-                Diese Seite folgt noch. <Link to="/">Zur Regalübersicht</Link>
+            <p>
+                <span className="page-lead">Coming soon!</span>{" "}
+                <span className="page-back">
+                    <Link to="/">← Go back</Link>
+                </span>
             </p>
         </div>
     )
