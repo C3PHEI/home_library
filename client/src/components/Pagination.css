@@ -1,0 +1,15 @@
+﻿.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.pagination-btn {
+    height: 44px;
+}
+
+.pagination-status {
+    font-size: 12.5px;
+    color: var(--text-muted);
+}

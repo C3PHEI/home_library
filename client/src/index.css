@@ -21,6 +21,13 @@
   --slot-empty-hover: #E2E6EB;
   --slot-empty-border: #B6BDC7;
 
+  --divider: #E4E8ED;
+  --row-divider: #EEF1F4;
+  --surface-muted: #FAFBFC;
+  --cover-bg: #E3E7ED;
+
+  --warning: #8A5A12;
+
   --danger: #A12C2C;
   --danger-soft: #FBECEC;
   --danger-border: #E5B5B5;
@@ -89,6 +96,25 @@ a:hover {
 }
 .btn-secondary:hover {
   border-color: var(--text-muted);
+  color: var(--text);
+}
+
+.btn:disabled,
+.btn:disabled:hover {
+  cursor: default;
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-faint);
+}
+
+.select {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 13px;
   color: var(--text);
 }
 

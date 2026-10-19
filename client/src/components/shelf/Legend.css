@@ -19,6 +19,10 @@
     border-radius: 2px;
 }
 
+.legend-swatch-selected {
+    background: var(--accent);
+}
+
 .legend-swatch-filled {
     background: var(--slot-filled);
     border: 1px solid var(--slot-filled-border);

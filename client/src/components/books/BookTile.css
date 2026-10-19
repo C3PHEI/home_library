@@ -1,0 +1,40 @@
+﻿.book-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.book-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    color: var(--text);
+}
+.book-tile:hover { color: var(--text); }
+.book-tile:hover .book-cover { border-color: var(--accent); }
+.book-tile:hover .book-tile-title { color: var(--accent); }
+
+.book-tile-title {
+    font-size: 12.5px;
+    font-weight: 500;
+    line-height: 1.3;
+    text-wrap: pretty;
+    overflow-wrap: anywhere;
+}
+
+.book-tile-author {
+    margin-top: -4px;
+    font-size: 11.5px;
+    line-height: 1.3;
+    color: var(--text-muted);
+}
+
+/* Auch von BookRow verwendet */
+.book-loaned {
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--warning);
+}

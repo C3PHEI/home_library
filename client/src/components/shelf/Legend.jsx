@@ -1,16 +1,23 @@
 ﻿import './Legend.css'
 
-export default function Legend() {
+// showSelected: zusätzlich "ausgewählt" zeigen, wenn eine Reihe offen ist
+export default function Legend({ showSelected = false }) {
     return (
         <div className="legend" aria-hidden="true">
-      <span className="legend-item">
-        <span className="legend-swatch legend-swatch-filled" />
-        mit Büchern
-      </span>
+            {showSelected && (
+                <span className="legend-item">
+                    <span className="legend-swatch legend-swatch-selected" />
+                    ausgewählt
+                </span>
+            )}
             <span className="legend-item">
-        <span className="legend-swatch legend-swatch-empty" />
-        leer
-      </span>
+                <span className="legend-swatch legend-swatch-filled" />
+                mit Büchern
+            </span>
+            <span className="legend-item">
+                <span className="legend-swatch legend-swatch-empty" />
+                leer
+            </span>
         </div>
     )
 }

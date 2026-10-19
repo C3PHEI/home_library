@@ -1,0 +1,220 @@
+﻿/* Desktop: Panel klebt rechts neben der Übersicht, die Bücher scrollen darin.
+   168 px = Kopf (60) + Seitentitel (84) + Abstand unten (24), damit
+   "Zurück/Weiter" auch ohne Scrollen sichtbar ist */
+.slot-panel {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100svh - 168px);
+    min-height: 320px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.slot-panel-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--divider);
+}
+
+.slot-panel-heading {
+    min-width: 0;
+}
+
+.slot-panel-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+}
+
+.slot-panel-title {
+    margin: 5px 0 0;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.slot-panel-sub {
+    margin: 5px 0 0;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.slot-panel-tools {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.view-toggle {
+    display: flex;
+    gap: 6px;
+}
+
+.view-toggle-btn {
+    height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--input-border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+.view-toggle-btn:hover {
+    border-color: var(--text-muted);
+    color: var(--text);
+}
+.view-toggle-btn[aria-pressed='true'] {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 500;
+}
+
+.slot-panel-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin-left: 4px;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+}
+.slot-panel-close:hover {
+    background: var(--bg);
+    color: var(--text);
+}
+
+.slot-panel-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--divider);
+    background: var(--surface-muted);
+}
+
+.slot-panel-sort {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+}
+
+.slot-panel-range {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--text-muted);
+}
+
+.slot-panel-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 16px 20px;
+    overflow-y: auto;
+}
+
+.slot-panel-books {
+    transition: opacity 120ms;
+}
+.slot-panel-books.is-loading {
+    opacity: 0.55;
+}
+
+.slot-panel-hint {
+    margin: 8px 0;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.slot-panel-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 0;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+.slot-panel-empty p {
+    margin: 0;
+}
+
+.slot-panel-foot {
+    padding: 12px 20px;
+    border-top: 1px solid var(--divider);
+}
+
+.slot-panel-message {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 18px 20px;
+}
+.slot-panel-message p {
+    margin: 0;
+    padding: 12px 14px;
+    border-radius: var(--radius);
+}
+
+.slot-panel-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Handy: Panel steht unter dem Möbel und scrollt mit der Seite */
+@media (max-width: 760px) {
+    .slot-panel {
+        max-height: none;
+        min-height: 0;
+        border-color: var(--slot-filled-border);
+        scroll-margin-top: 165px; /* zweizeiliger Kopf auf dem Handy */
+    }
+
+    .slot-panel-head {
+        align-items: center;
+        padding: 12px 14px;
+        background: var(--accent-soft);
+        border-bottom-color: var(--slot-filled-border);
+    }
+
+    .slot-panel-eyebrow { display: none; }
+
+    .slot-panel-title {
+        margin: 0;
+        font-size: 15px;
+        color: var(--accent-hover);
+    }
+
+    .slot-panel-sub {
+        margin-top: 2px;
+        font-size: 12px;
+        color: var(--slot-count);
+    }
+
+    .view-toggle-btn { padding: 0 11px; }
+    .slot-panel-close { width: 40px; margin-left: 0; }
+
+    .slot-panel-toolbar,
+    .slot-panel-foot { padding: 10px 14px; }
+
+    .slot-panel-body {
+        padding: 4px 14px 8px;
+        overflow: visible;
+    }
+    .slot-panel-body:has(.book-grid) { padding-top: 14px; }
+}

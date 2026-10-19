@@ -45,6 +45,39 @@
     align-items: start;
 }
 
+/* Reihe ausgewählt (Desktop): Übersicht links schmal, Bücherliste rechts */
+.shelf-layout.has-panel {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+}
+
+/* 4 Karten à 141 px + 3 Abstände = 612 px wie im Mockup */
+.has-panel .shelf-rooms {
+    flex: 0 0 612px;
+    min-width: 0;
+}
+
+.has-panel .furniture-grid {
+    grid-template-columns: repeat(auto-fill, 141px);
+}
+
+.shelf-panel-column {
+    flex: 1 1 auto;
+    min-width: 0;
+    position: sticky;
+    top: 80px;
+}
+
+/* Handy: Bücherliste als eigene Zeile unter dem Möbel */
+.shelf-panel-inline {
+    grid-column: 1 / -1;
+}
+
+.shelf-panel-top {
+    margin-bottom: 22px;
+}
+
 .state-message {
     display: flex;
     align-items: center;
@@ -60,6 +93,11 @@
     border-radius: var(--radius);
     background: var(--danger-soft);
     color: var(--danger);
+}
+
+/* Mittlere Breite: nur 2 Karten nebeneinander, damit die Liste Platz hat */
+@media (max-width: 1100px) {
+    .has-panel .shelf-rooms { flex-basis: 298px; }
 }
 
 @media (max-width: 760px) {

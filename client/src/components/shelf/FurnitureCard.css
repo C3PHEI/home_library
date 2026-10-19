@@ -77,3 +77,22 @@
     border-color: var(--text-muted);
 }
 .slot-empty .slot-count { color: inherit; }
+
+/* Ausgewählte Reihe (auch wenn sie leer ist) */
+.slot.is-selected,
+.slot.is-selected:hover {
+    background: var(--accent);
+    border-style: solid;
+    border-color: var(--accent-hover);
+    color: #FFFFFF;
+    font-weight: 500;
+}
+.slot.is-selected .slot-count { color: inherit; }
+
+/* Schmale Karte neben der offenen Bücherliste */
+.furniture-card.is-compact { padding: 10px; }
+.is-compact .furniture-card-head { gap: 6px; margin-bottom: 8px; }
+.is-compact .furniture-name { font-size: 12.5px; }
+.is-compact .furniture-count { font-size: 10.5px; }
+.is-compact .slot { gap: 6px; padding: 0 10px; font-size: 12.5px; }
+.is-compact .slot-count { font-size: 11.5px; }
