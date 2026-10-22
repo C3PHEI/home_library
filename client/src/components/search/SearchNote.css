@@ -1,0 +1,27 @@
+﻿/* Masse aus Suche.html (Info-Box unter den Treffern) */
+.search-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding: 13px 15px;
+    border: 1px solid var(--divider);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text-muted);
+}
+
+.search-note svg {
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.search-note-text {
+    font-size: 12.5px;
+    line-height: 1.5;
+}
+
+.search-note-text strong {
+    font-weight: 600;
+    color: var(--text);
+}

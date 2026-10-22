@@ -5,6 +5,7 @@ import { useApi } from '../hooks/useApi.js'
 import { formatCount, plural } from '../utils/format.js'
 import SearchForm from '../components/search/SearchForm.jsx'
 import SearchHit from '../components/search/SearchHit.jsx'
+import SearchNote from '../components/search/SearchNote.jsx'
 import SearchTabs from '../components/search/SearchTabs.jsx'
 import { hasUsefulTabs, tabLabel, visibleTabs } from '../components/search/searchTabUtils.js'
 import './SearchPage.css'
@@ -63,7 +64,10 @@ export default function SearchPage() {
 
                 <SearchForm key={q} initialQuery={q} onSearch={handleSearch} />
 
-                <p className="search-hint">Sucht in Titel, Autor und ISBN.</p>
+                <p className="search-hint">
+                    Sucht in Titel, Autor, ISBN, Verlag, Erscheinungsjahr, Sprache und Standort.
+                    Tippfehler bei Titel und Autor sind verziehen.
+                </p>
             </div>
 
             {showTabs && <SearchTabs tabs={tabs} activeTab={activeTab} onChange={handleTabChange} />}
@@ -133,13 +137,31 @@ function SearchStatus({ q, data, results, visibleCount, activeTab }) {
     }
 
     // 5. Treffer ("Alle" oder gefiltert)
+    // fuzzy: keine genauen Treffer, die Liste kommt aus der Tippfehler-Suche (pg_trgm)
+    const fuzzy = isFuzzy(data)
+
     return (
-        <div className="search-summary" role="status">
-            <span>
-                {activeTab === 'all'
-                    ? plural(data.total, 'Treffer', 'Treffer')
-                    : `${formatCount(visibleCount)} von ${plural(data.total, 'Treffer', 'Treffern')} in ${tabLabel(activeTab)}`}
-            </span>
-        </div>
+        <>
+            <div className="search-summary" role="status">
+                <span>
+                    {activeTab === 'all'
+                        ? plural(data.total, 'Treffer', 'Treffer')
+                        : `${formatCount(visibleCount)} von ${plural(data.total, 'Treffer', 'Treffern')} in ${tabLabel(activeTab)}`}
+                </span>
+                <span>{fuzzy ? 'Sortiert nach Ähnlichkeit' : 'Sortiert nach Titel'}</span>
+            </div>
+
+            {fuzzy && (
+                <SearchNote>
+                    <strong>Keine genauen Treffer für „{q}“.</strong> Das sind ähnliche Titel und Autoren,
+                    die ähnlichsten zuerst. Vielleicht ist ein Tippfehler im Suchbegriff.
+                </SearchNote>
+            )}
+        </>
     )
+}
+
+// Das Backend markiert den Tab "Alle" mit fuzzy: true, wenn die Tippfehler-Suche lief
+function isFuzzy(data) {
+    return data.tabs.some((tab) => tab.key === 'all' && tab.fuzzy)
 }
