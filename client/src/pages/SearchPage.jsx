@@ -39,21 +39,75 @@ export default function SearchPage() {
                 <p className="search-hint">Sucht in Titel, Autor und ISBN.</p>
             </div>
 
-            {/* Etappe 5 ersetzt diesen Teil durch alle Zustände (lädt, Fehler, nichts gefunden …) */}
-            {data && (
-                <div className="search-summary">
-                    <span>{plural(data.total, 'Treffer', 'Treffer')}</span>
+            <SearchStatus q={q} data={data} results={results} />
+
+            {data && data.total > 0 && (
+                <div className={results.loading ? 'search-results is-loading' : 'search-results'}>
+                    {/* Etappe 6 ersetzt die einfache Liste durch Trefferkarten */}
+                    {data.items.map((book) => (
+                        <div key={book.id}>
+                            {book.title} – {book.author} ({book.location.furnitureName}, {book.location.slotLabel})
+                        </div>
+                    ))}
                 </div>
             )}
+        </div>
+    )
+}
 
-            <div className="search-results">
-                {/* Etappe 6 ersetzt die einfache Liste durch Trefferkarten */}
-                {data?.items.map((book) => (
-                    <div key={book.id}>
-                        {book.title} – {book.author} ({book.location.furnitureName}, {book.location.slotLabel})
-                    </div>
-                ))}
+// Alles, was über (oder statt) den Treffern steht. Genau ein Zustand ist sichtbar.
+function SearchStatus({ q, data, results }) {
+    // 1. Noch kein Suchbegriff
+    if (!q) {
+        return <p className="state-message">Titel, Autor oder ISBN eingeben und auf „Suchen“ klicken.</p>
+    }
+
+    // 2. Fehler
+    if (results.error) {
+        const error = results.error
+        // 400: Eingabe ungültig (z. B. zu lang). Nochmals versuchen bringt nichts.
+        if (error.status === 400) {
+            return (
+                <div className="state-message state-error" role="alert">
+                    <span>Ungültiger Suchbegriff: {error.fields?.q ?? error.message}</span>
+                </div>
+            )
+        }
+        return (
+            <div className="state-message state-error" role="alert">
+                <span>Die Suche hat nicht geklappt: {error.message}</span>
+                <button type="button" className="btn btn-secondary" onClick={results.reload}>
+                    Nochmals versuchen
+                </button>
             </div>
+        )
+    }
+
+    // 3. Lädt (erste Antwort für diesen Begriff steht noch aus)
+    if (!data) {
+        return (
+            <p className="state-message" role="status">
+                Suche läuft …
+            </p>
+        )
+    }
+
+    // 4. Nichts gefunden
+    if (data.total === 0) {
+        return (
+            <div className="search-empty" role="status">
+                <p className="search-empty-title">Nichts gefunden für „{q}“.</p>
+                <p className="search-empty-tip">
+                    Tipp: Weniger Wörter versuchen, nur den Nachnamen des Autors oder die ISBN ohne Bindestriche.
+                </p>
+            </div>
+        )
+    }
+
+    // 5. Treffer
+    return (
+        <div className="search-summary" role="status">
+            <span>{plural(data.total, 'Treffer', 'Treffer')}</span>
         </div>
     )
 }

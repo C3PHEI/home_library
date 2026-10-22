@@ -34,6 +34,45 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    transition: opacity 120ms;
+}
+
+/* "Nochmals versuchen" läuft: alte Treffer gedimmt stehen lassen */
+.search-results.is-loading {
+    opacity: 0.55;
+}
+
+/* Nichts gefunden */
+.search-empty {
+    max-width: 760px;
+    padding: 18px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.search-empty-title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.search-empty-tip {
+    margin: 6px 0 0;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+/* .state-message hat 24 px Abstand oben, hier sitzt es direkt unter dem Hinweis */
+.search-page .state-message {
+    margin-top: 8px;
+}
+
+/* Fehlerbox so breit wie das Suchfeld */
+.search-page .state-error {
+    max-width: 760px;
+    box-sizing: border-box;
 }
 
 @media (max-width: 760px) {
