@@ -1,15 +1,17 @@
 ﻿import { useCallback } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useLocation, useSearchParams } from 'react-router-dom'
 import { searchBooks } from '../api/search.js'
 import { useApi } from '../hooks/useApi.js'
 import { plural } from '../utils/format.js'
 import SearchForm from '../components/search/SearchForm.jsx'
+import SearchHit from '../components/search/SearchHit.jsx'
 import './SearchPage.css'
 
 // Suche: /suche?q=süskin
 // Die URL ist die "Wahrheit": Neuladen und Zurück-Taste zeigen dieselbe Suche.
 export default function SearchPage() {
     const [searchParams, setSearchParams] = useSearchParams()
+    const location = useLocation()
     const q = (searchParams.get('q') ?? '').trim()
 
     // Neuer loader, sobald sich q ändert -> useApi lädt neu.
@@ -22,6 +24,10 @@ export default function SearchPage() {
 
     // Gehört die Antwort noch zu einer früheren Suche, nicht anzeigen
     const data = results.data?.query === q ? results.data : null
+
+
+    // Rückweg für die Buchdetailseite: genau diese Suche
+    const from = location.pathname + location.search
 
     function handleSearch(nextQuery) {
         if (nextQuery === q) return
@@ -42,14 +48,13 @@ export default function SearchPage() {
             <SearchStatus q={q} data={data} results={results} />
 
             {data && data.total > 0 && (
-                <div className={results.loading ? 'search-results is-loading' : 'search-results'}>
-                    {/* Etappe 6 ersetzt die einfache Liste durch Trefferkarten */}
+                <ul className={results.loading ? 'search-results is-loading' : 'search-results'}>
                     {data.items.map((book) => (
-                        <div key={book.id}>
-                            {book.title} – {book.author} ({book.location.furnitureName}, {book.location.slotLabel})
-                        </div>
+                        <li key={book.id}>
+                            <SearchHit book={book} from={from} />
+                        </li>
                     ))}
-                </div>
+                </ul>
             )}
         </div>
     )

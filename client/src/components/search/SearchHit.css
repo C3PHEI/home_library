@@ -1,0 +1,93 @@
+﻿/* Masse und Farben aus Suche.html */
+.search-hit {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    transition: border-color 120ms;
+}
+.search-hit:hover {
+    color: var(--text);
+    border-color: var(--accent);
+}
+.search-hit:hover .search-hit-title {
+    color: var(--accent);
+}
+
+.search-hit-text {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.search-hit-title {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    overflow-wrap: anywhere;
+}
+
+.search-hit-author {
+    font-size: 13px;
+    color: var(--slot-count);
+}
+
+.search-hit-isbn {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* Standort-Box rechts: das Wichtigste am Treffer */
+.search-hit-location {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex-shrink: 0;
+    padding: 10px 14px;
+    border: 1px solid var(--slot-filled-border);
+    border-radius: var(--radius-sm);
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+.search-hit-location-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.search-hit-place {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--accent-hover);
+}
+
+.search-hit-room {
+    font-size: 11.5px;
+    color: var(--slot-count);
+}
+
+/* Handy: Cover und Text nebeneinander, Standort darunter über die ganze Breite */
+@media (max-width: 760px) {
+    .search-hit {
+        flex-wrap: wrap;
+        gap: 12px 14px;
+        padding: 12px;
+    }
+
+    .search-hit-text {
+        flex-basis: 0;
+    }
+
+    .search-hit-location {
+        flex-basis: 100%;
+        box-sizing: border-box;
+    }
+}

@@ -19,6 +19,17 @@
     border-radius: 2px;
 }
 
+.book-cover-hit {
+    width: 54px;
+    height: 76px;
+    flex-shrink: 0;
+}
+
+.book-cover-hit.book-cover-missing svg {
+    width: 20px;
+    height: 20px;
+}
+
 .book-cover-missing {
     display: flex;
     flex-direction: column;
