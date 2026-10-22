@@ -20,6 +20,16 @@
     color: var(--text-muted);
 }
 
+.search-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
 .search-results {
     display: flex;
     flex-direction: column;
