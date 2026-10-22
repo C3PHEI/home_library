@@ -2,12 +2,14 @@
 import { useLocation, useSearchParams } from 'react-router-dom'
 import { searchBooks } from '../api/search.js'
 import { useApi } from '../hooks/useApi.js'
-import { plural } from '../utils/format.js'
+import { formatCount, plural } from '../utils/format.js'
 import SearchForm from '../components/search/SearchForm.jsx'
 import SearchHit from '../components/search/SearchHit.jsx'
+import SearchTabs from '../components/search/SearchTabs.jsx'
+import { hasUsefulTabs, tabLabel, visibleTabs } from '../components/search/searchTabUtils.js'
 import './SearchPage.css'
 
-// Suche: /suche?q=süskin
+// Suche: /suche?q=süskin&tab=author
 // Die URL ist die "Wahrheit": Neuladen und Zurück-Taste zeigen dieselbe Suche.
 export default function SearchPage() {
     const [searchParams, setSearchParams] = useSearchParams()
@@ -25,14 +27,33 @@ export default function SearchPage() {
     // Gehört die Antwort noch zu einer früheren Suche, nicht anzeigen
     const data = results.data?.query === q ? results.data : null
 
+    // Tabs: nur die mit Treffern. Unbekannter oder leerer Tab in der URL -> "Alle"
+    const tabs = data ? visibleTabs(data.tabs) : []
+    const requestedTab = searchParams.get('tab') ?? 'all'
+    const activeTab = tabs.some((tab) => tab.key === requestedTab) ? requestedTab : 'all'
+    const showTabs = data && hasUsefulTabs(tabs, data.total)
 
-    // Rückweg für die Buchdetailseite: genau diese Suche
+    // Gefiltert wird hier: jeder Treffer weiss in "matches", zu welchen Tabs er gehört
+    const items = !data
+        ? []
+        : activeTab === 'all'
+            ? data.items
+            : data.items.filter((book) => book.matches.includes(activeTab))
+
+    // Rückweg für die Buchdetailseite: genau diese Suche (inkl. Tab)
     const from = location.pathname + location.search
 
     function handleSearch(nextQuery) {
         if (nextQuery === q) return
-        // Neuer Eintrag im Verlauf, damit "Zurück" zur vorherigen Suche führt
+        // Neue Suche beginnt immer bei "Alle". Neuer Eintrag im Verlauf,
+        // damit "Zurück" zur vorherigen Suche führt.
         setSearchParams(nextQuery ? { q: nextQuery } : {})
+    }
+
+    function handleTabChange(tab) {
+        // Tabwechsel ersetzt den Verlaufseintrag: "Zurück" springt zur vorherigen Suche,
+        // nicht durch jeden angeklickten Tab
+        setSearchParams(tab === 'all' ? { q } : { q, tab }, { replace: true })
     }
 
     return (
@@ -45,11 +66,13 @@ export default function SearchPage() {
                 <p className="search-hint">Sucht in Titel, Autor und ISBN.</p>
             </div>
 
-            <SearchStatus q={q} data={data} results={results} />
+            {showTabs && <SearchTabs tabs={tabs} activeTab={activeTab} onChange={handleTabChange} />}
 
-            {data && data.total > 0 && (
+            <SearchStatus q={q} data={data} results={results} visibleCount={items.length} activeTab={activeTab} />
+
+            {items.length > 0 && (
                 <ul className={results.loading ? 'search-results is-loading' : 'search-results'}>
-                    {data.items.map((book) => (
+                    {items.map((book) => (
                         <li key={book.id}>
                             <SearchHit book={book} from={from} />
                         </li>
@@ -61,7 +84,7 @@ export default function SearchPage() {
 }
 
 // Alles, was über (oder statt) den Treffern steht. Genau ein Zustand ist sichtbar.
-function SearchStatus({ q, data, results }) {
+function SearchStatus({ q, data, results, visibleCount, activeTab }) {
     // 1. Noch kein Suchbegriff
     if (!q) {
         return <p className="state-message">Titel, Autor oder ISBN eingeben und auf „Suchen“ klicken.</p>
@@ -109,10 +132,14 @@ function SearchStatus({ q, data, results }) {
         )
     }
 
-    // 5. Treffer
+    // 5. Treffer ("Alle" oder gefiltert)
     return (
         <div className="search-summary" role="status">
-            <span>{plural(data.total, 'Treffer', 'Treffer')}</span>
+            <span>
+                {activeTab === 'all'
+                    ? plural(data.total, 'Treffer', 'Treffer')
+                    : `${formatCount(visibleCount)} von ${plural(data.total, 'Treffer', 'Treffern')} in ${tabLabel(activeTab)}`}
+            </span>
         </div>
     )
 }

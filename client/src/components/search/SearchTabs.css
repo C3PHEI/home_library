@@ -1,0 +1,52 @@
+﻿/* Gleicher Stil wie die Hauptnavigation oben (.nav-link) */
+.search-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--divider);
+}
+
+.search-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    white-space: nowrap;
+    cursor: pointer;
+}
+.search-tab:hover {
+    background: var(--surface);
+    color: var(--text);
+}
+.search-tab[aria-pressed='true'] {
+    background: var(--accent-soft);
+    border-color: var(--slot-filled-border);
+    color: var(--accent);
+}
+
+.search-tab-count {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: inherit;
+    opacity: 0.8;
+}
+
+/* Handy: Tabs nebeneinander lassen und seitlich wischen statt umbrechen */
+@media (max-width: 760px) {
+    .search-tabs {
+        overflow-x: auto;
+        margin-right: -16px;
+        padding-right: 16px;
+        scrollbar-width: none;
+    }
+    .search-tab { height: 40px; }
+}
