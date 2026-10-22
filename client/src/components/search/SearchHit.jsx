@@ -1,5 +1,6 @@
 ﻿import { Link } from 'react-router-dom'
 import BookCover from '../books/BookCover.jsx'
+import { placeLabel } from '../../utils/location.js'
 import './SearchHit.css'
 
 // Ein Suchtreffer: Cover, Titel, Autor, ISBN und rechts der Standort.
@@ -27,12 +28,6 @@ export default function SearchHit({ book, from }) {
             </span>
         </Link>
     )
-}
-
-// Tische haben nur eine "Ablage" (siehe 01_schema.sql), dort reicht der Möbelname
-function placeLabel(location) {
-    if (location.slotLabel === 'Ablage') return location.furnitureName
-    return `${location.furnitureName}, ${location.slotLabel}`
 }
 
 function PinIcon() {

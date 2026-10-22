@@ -6,6 +6,8 @@ import { formatCount, plural } from '../utils/format.js'
 import SearchForm from '../components/search/SearchForm.jsx'
 import SearchHit from '../components/search/SearchHit.jsx'
 import SearchNote from '../components/search/SearchNote.jsx'
+import DuplicateNote from '../components/search/DuplicateNote.jsx'
+import { findDuplicateGroups } from '../components/search/duplicates.js'
 import SearchTabs from '../components/search/SearchTabs.jsx'
 import { hasUsefulTabs, tabLabel, visibleTabs } from '../components/search/searchTabUtils.js'
 import './SearchPage.css'
@@ -40,6 +42,9 @@ export default function SearchPage() {
         : activeTab === 'all'
             ? data.items
             : data.items.filter((book) => book.matches.includes(activeTab))
+
+    // Doppelte Exemplare unter den sichtbaren Treffern (Hinweis unter der Liste)
+    const duplicateGroups = findDuplicateGroups(items)
 
     // Rückweg für die Buchdetailseite: genau diese Suche (inkl. Tab)
     const from = location.pathname + location.search
@@ -83,6 +88,8 @@ export default function SearchPage() {
                     ))}
                 </ul>
             )}
+
+            <DuplicateNote groups={duplicateGroups} />
         </div>
     )
 }

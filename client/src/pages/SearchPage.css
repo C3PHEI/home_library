@@ -78,6 +78,11 @@
     box-sizing: border-box;
 }
 
+/* Hinweis auf doppelte Exemplare unter der Liste (wie im Mockup) */
+.search-results + .search-note {
+    margin-top: 16px;
+}
+
 @media (max-width: 760px) {
     .search-page { padding-top: 16px; }
 }

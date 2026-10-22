@@ -25,3 +25,11 @@
     font-weight: 600;
     color: var(--text);
 }
+
+
+/* Mehrere Sätze untereinander (z. B. Hinweis auf doppelte Exemplare) */
+.search-note-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
