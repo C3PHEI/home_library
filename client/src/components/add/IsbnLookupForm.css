@@ -1,0 +1,67 @@
+﻿.isbn-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.isbn-label {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.isbn-row {
+    display: flex;
+    gap: 8px;
+}
+
+.isbn-input {
+    flex-grow: 1;
+    height: 44px;
+    font-family: var(--mono);
+    font-size: 14px;
+}
+.isbn-input:focus {
+    border-color: var(--accent);
+    outline: none;
+    box-shadow: 0 0 0 1px var(--accent);
+}
+.isbn-input[aria-invalid='true'] {
+    border-color: var(--danger);
+}
+.isbn-input[aria-invalid='true']:focus {
+    box-shadow: 0 0 0 1px var(--danger);
+}
+
+.isbn-button {
+    height: 44px;
+    padding: 0 20px;
+    min-width: 128px;
+}
+
+/* "Wird geholt …": blau bleiben, nur blasser (statt grau wie andere gesperrte Knöpfe) */
+.isbn-button:disabled,
+.isbn-button:disabled:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #FFFFFF;
+    opacity: 0.7;
+}
+
+.isbn-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+.isbn-hint.is-valid {
+    color: var(--success-icon);
+}
+.isbn-hint.is-error {
+    font-weight: 500;
+    color: var(--danger);
+}
+
+/* Handy: Knopf unter dem Feld, wie in Handy-Erfassen.html */
+@media (max-width: 560px) {
+    .isbn-row { flex-direction: column; }
+    .isbn-input { height: 48px; font-size: 15px; }
+    .isbn-button { height: 48px; }
+}
