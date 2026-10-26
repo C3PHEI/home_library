@@ -17,6 +17,9 @@ function AppHeader() {
     const { pathname } = useLocation()
     // "Regal" bleibt aktiv, auch wenn eine Reihe geoeffnet ist
     const shelfActive = pathname === '/' || pathname.startsWith('/regal')
+    // Die Suchseite hat ihr eigenes grosses Suchfeld, oben keins (wie im Mockup)
+    const onSearchPage = pathname === '/suche'
+    const onAddPage = pathname.startsWith('/erfassen')
 
     return (
         <header className="app-header">
@@ -34,9 +37,13 @@ function AppHeader() {
                 </NavLink>
             </nav>
 
-            <SearchForm />
+            {onSearchPage ? <div className="header-spacer" /> : <SearchForm />}
 
-            <Link to="/erfassen" className="btn btn-primary">
+            <Link
+                to="/erfassen"
+                className={onAddPage ? 'btn btn-primary is-active' : 'btn btn-primary'}
+                aria-current={onAddPage ? 'page' : undefined}
+            >
                 Buch erfassen
             </Link>
         </header>

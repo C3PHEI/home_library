@@ -61,6 +61,16 @@
     margin-left: auto;
 }
 
+.header-spacer {
+    margin-left: auto;
+}
+
+/* Auf der Erfassen-Seite: Knopf hell wie im Mockup (Erfassen-ISBN.html) */
+.app-header .btn-primary.is-active {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
 .app-main {
     flex-grow: 1;
 }
