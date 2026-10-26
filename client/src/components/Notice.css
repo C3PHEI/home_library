@@ -1,0 +1,69 @@
+﻿/* Masse und Farben aus Erfassen-ISBN.html */
+.notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--divider);
+    border-radius: var(--radius-sm);
+    background: var(--surface-muted);
+    color: var(--text-muted);
+}
+
+.notice-icon {
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.notice-body {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.notice-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    overflow-wrap: anywhere;
+}
+
+.notice-text {
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.notice-action {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.notice a {
+    font-weight: 500;
+}
+
+.notice-success {
+    border-color: var(--success-border);
+    background: var(--success-soft);
+    color: var(--success-muted);
+}
+.notice-success .notice-icon { color: var(--success-icon); }
+.notice-success .notice-title { color: var(--success-text); }
+
+.notice-caution {
+    border-color: var(--caution-border);
+    background: var(--caution-soft);
+    color: var(--caution-muted);
+}
+.notice-caution .notice-icon { color: var(--caution-icon); }
+.notice-caution .notice-title { color: var(--caution-text); }
+
+.notice-error {
+    border-color: var(--danger-border);
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+.notice-error .notice-title { color: var(--danger); }

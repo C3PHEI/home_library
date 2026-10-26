@@ -32,6 +32,18 @@
   --danger-soft: #FBECEC;
   --danger-border: #E5B5B5;
 
+  --success-soft: #EDF6EF;
+  --success-border: #A9CDB4;
+  --success-icon: #2E6B42;
+  --success-text: #24572F;
+  --success-muted: #3D6A48;
+
+  --caution-soft: #FDF3E3;
+  --caution-border: #E0B15E;
+  --caution-icon: #8A5E12;
+  --caution-text: #6B4A12;
+  --caution-muted: #7A5716;
+
   --radius: 6px;
   --radius-sm: 4px;
 
