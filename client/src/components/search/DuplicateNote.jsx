@@ -1,4 +1,5 @@
-﻿import { placeLabel } from '../../utils/location.js'
+﻿import { joinGerman } from '../../utils/format.js'
+import { placeLabel } from '../../utils/location.js'
 import SearchNote from './SearchNote.jsx'
 
 const MAX_LISTED = 3
@@ -27,10 +28,4 @@ export default function DuplicateNote({ groups }) {
             <span className="duplicate-line">Doppelte Exemplare sind eigenständige Einträge.</span>
         </SearchNote>
     )
-}
-
-// ["A", "B", "C"] -> "A, B und C"
-function joinGerman(parts) {
-    if (parts.length <= 1) return parts.join('')
-    return `${parts.slice(0, -1).join(', ')} und ${parts.at(-1)}`
 }
