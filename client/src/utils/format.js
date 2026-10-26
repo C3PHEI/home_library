@@ -7,3 +7,9 @@ export function formatCount(value) {
 export function plural(count, singular, pluralForm) {
     return `${formatCount(count)} ${count === 1 ? singular : pluralForm}`
 }
+
+// ["A", "B", "C"] -> "A, B und C"
+export function joinGerman(parts) {
+    if (parts.length <= 1) return parts.join('')
+    return `${parts.slice(0, -1).join(', ')} und ${parts.at(-1)}`
+}
