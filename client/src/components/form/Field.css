@@ -1,0 +1,68 @@
+﻿/* Masse aus Erfassen-ISBN.html: Felder 44 px hoch, Beschriftung 12.5 px fett */
+.field {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    min-width: 0;
+}
+
+.field-wide {
+    grid-column: 1 / -1;
+}
+
+.field-label {
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+.field-input {
+    height: 44px;
+    font-size: 13.5px;
+}
+
+.field-input.is-mono {
+    font-family: var(--mono);
+}
+
+textarea.field-input {
+    height: auto;
+    min-height: 64px;
+    padding: 10px 12px;
+    line-height: 1.45;
+    resize: vertical;
+}
+
+select.field-input {
+    width: 100%;
+    padding: 0 10px;
+}
+
+select.field-input:disabled {
+    color: var(--text-faint);
+    background: var(--surface-muted);
+}
+
+.field-input:focus {
+    border-color: var(--accent);
+    outline: none;
+    box-shadow: 0 0 0 1px var(--accent);
+}
+
+.field-input[aria-invalid='true'] {
+    border-color: var(--danger);
+}
+.field-input[aria-invalid='true']:focus {
+    box-shadow: 0 0 0 1px var(--danger);
+}
+
+.field-hint {
+    font-size: 11.5px;
+    color: var(--text-muted);
+}
+
+.field-error {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--danger);
+}
