@@ -28,11 +28,11 @@ function NoticeIcon({ variant }) {
                     <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
                 </>
             )}
-            {(variant === 'info' || variant === 'error') && (
+            {(variant === 'info' || variant === 'accent' || variant === 'error') && (
                 <>
                     <circle cx="12" cy="12" r="9" />
-                    <path d={variant === 'info' ? 'M12 11v5' : 'M12 7v6'} />
-                    <path d={variant === 'info' ? 'M12 8h.01' : 'M12 16.5h.01'} />
+                    <path d={variant === 'error' ? 'M12 7v6' : 'M12 11v5'} />
+                    <path d={variant === 'error' ? 'M12 16.5h.01' : 'M12 8h.01'} />
                 </>
             )}
         </svg>

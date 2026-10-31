@@ -67,3 +67,12 @@
     color: var(--danger);
 }
 .notice-error .notice-title { color: var(--danger); }
+
+/* Blau: Hinweis zur Seite (Erfassen-Manuell.html, "Notausgang") */
+.notice-accent {
+    border-color: var(--accent-border);
+    background: var(--accent-notice);
+    color: var(--accent-notice-muted);
+}
+.notice-accent .notice-icon { color: var(--accent); }
+.notice-accent .notice-title { color: var(--accent-notice-text); }
