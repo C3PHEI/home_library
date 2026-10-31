@@ -1,0 +1,105 @@
+﻿/* .side-card, .side-card-title und .side-card-note kommen aus AddBookIsbnPage.css.
+   Masse aus Erfassen-Manuell.html: gestrichelte Fläche, 250 px hoch. */
+
+.cover-drop {
+    position: relative;
+    height: 250px;
+    box-sizing: border-box;
+    border: 1px dashed var(--text-faint);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+}
+
+.cover-drop.has-image {
+    border-style: solid;
+    border-color: var(--border);
+    background: var(--surface);
+}
+
+.cover-drop.is-dragging {
+    border-style: dashed;
+    border-color: var(--accent);
+    background: var(--accent-soft);
+}
+
+.cover-drop .book-cover-preview {
+    height: 100%;
+    border: 0;
+}
+
+.cover-drop-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    height: 100%;
+    padding: 16px;
+    box-sizing: border-box;
+    border: 0;
+    border-radius: inherit;
+    background: transparent;
+    font-family: inherit;
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: var(--text-muted);
+    text-align: center;
+    cursor: pointer;
+}
+.cover-drop-empty span {
+    max-width: 240px;
+}
+.cover-drop-empty svg {
+    color: var(--text-faint);
+}
+.cover-drop-empty:hover svg,
+.cover-drop.is-dragging .cover-drop-empty svg {
+    color: var(--accent);
+}
+.cover-drop-empty:disabled {
+    cursor: progress;
+}
+
+/* Liegt über dem alten Bild, solange das neue hochlädt */
+.cover-drop-busy {
+    position: absolute;
+    inset: auto 8px 8px;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.92);
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.cover-upload-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.cover-upload-actions .btn {
+    flex: 1 1 auto;
+    height: 44px;
+}
+
+.cover-upload-remove {
+    color: var(--danger);
+}
+.cover-upload-remove:hover {
+    border-color: var(--danger-border);
+    color: var(--danger);
+}
+
+.cover-upload-error {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--danger);
+}
+
+@media (max-width: 1100px) {
+    .cover-drop {
+        height: 200px;
+    }
+}
