@@ -27,9 +27,9 @@ import SavedNotice from '../components/add/SavedNotice.jsx'
 import './AddBookIsbnPage.css'
 
 const PLACEHOLDERS = {
-    title: 'Zum Beispiel Sansibar oder der letzte Grund',
-    author: 'Zum Beispiel Alfred Andersch',
-    note: 'Freitext',
+    title: 'Titel eingeben',
+    author: 'Vor- und Nachname eingeben',
+    note: 'Schreibe hier deine Notiz …',
 }
 
 // Erfassen ohne ISBN: /erfassen/ohne-isbn (aus einer leeren Reihe: /erfassen/ohne-isbn?slot=17)
