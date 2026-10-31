@@ -13,6 +13,11 @@
   --accent-hover: #16437A;
   --accent-soft: #E7EFF8;
 
+  --accent-border: #C0CEDD;
+  --accent-notice: #EDF2F8;
+  --accent-notice-text: #1B4B85;
+  --accent-notice-muted: #33506E;
+
   --slot-filled: #DCE8F5;
   --slot-filled-hover: #CBDDF0;
   --slot-filled-border: #A8C4E3;
