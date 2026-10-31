@@ -5,6 +5,7 @@ import SlotPanel from './components/shelf/SlotPanel.jsx'
 import PlaceholderPage from './pages/PlaceholderPage.jsx'
 import SearchPage from './pages/SearchPage.jsx'
 import AddBookIsbnPage from './pages/AddBookIsbnPage.jsx'
+import AddBookManualPage from './pages/AddBookManualPage.jsx'
 
 export default function App() {
     return (
@@ -20,7 +21,7 @@ export default function App() {
                 <Route path="buecher/:bookId" element={<PlaceholderPage title="Buchdetail" />} />
                 <Route path="suche" element={<SearchPage />} />
                 <Route path="erfassen" element={<AddBookIsbnPage />} />
-                <Route path="erfassen/ohne-isbn" element={<PlaceholderPage title="Buch ohne ISBN erfassen" />} />
+                <Route path="erfassen/ohne-isbn" element={<AddBookManualPage />} />
 
                 <Route path="*" element={<PlaceholderPage title="Seite nicht gefunden" />} />
             </Route>
