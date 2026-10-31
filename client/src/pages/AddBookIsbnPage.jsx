@@ -6,44 +6,35 @@ import { uploadCover } from '../api/covers.js'
 import { createBook } from '../api/books.js'
 import { useApi } from '../hooks/useApi.js'
 import { checkIsbn, cleanIsbn, isbnProblem } from '../utils/isbn.js'
-import { placeLabel, slotOptionGroups } from '../utils/location.js'
+import { slotOptionGroups } from '../utils/location.js'
 import { joinGerman } from '../utils/format.js'
+import {
+    BOOK_FIELD_IDS,
+    EMPTY_BOOK,
+    EMPTY_COVER,
+    bookPayloadFields,
+    coverFileProblem,
+    focusFirstError,
+    missingRequired,
+    omit,
+    uploadErrorMessage,
+    validSlotValue,
+} from '../utils/bookForm.js'
 import Notice from '../components/Notice.jsx'
 import BookFormFields from '../components/books/BookFormFields.jsx'
 import IsbnLookupForm from '../components/add/IsbnLookupForm.jsx'
 import LookupNotices from '../components/add/LookupNotices.jsx'
 import CoverPicker from '../components/add/CoverPicker.jsx'
 import LookupSources from '../components/add/LookupSources.jsx'
+import SavedNotice from '../components/add/SavedNotice.jsx'
 import './AddBookIsbnPage.css'
 
-const EMPTY_BOOK = {
-    title: '',
-    author: '',
-    publisher: '',
-    publishedYear: '',
-    language: '',
-    pages: '',
-    shelfSlotId: '',
-    note: '',
-}
-const EMPTY_COVER = { choice: 'none', upload: null, uploading: false, error: null }
 const IDLE = { status: 'idle' }
-const MAX_COVER_BYTES = 10 * 1024 * 1024
 
 // Felder, die der ISBN-Abruf ausfüllt (Standort und Notiz bleiben, wie sie sind)
 const LOOKUP_FIELDS = ['title', 'author', 'publisher', 'publishedYear', 'language', 'pages']
 // Reihenfolge auf der Seite: dorthin springt der Fokus beim ersten Fehler
-const FIELD_IDS = {
-    isbn: 'isbn',
-    title: 'book-title',
-    author: 'book-author',
-    publisher: 'book-publisher',
-    publishedYear: 'book-year',
-    language: 'book-language',
-    pages: 'book-pages',
-    shelfSlotId: 'book-location',
-    note: 'book-note',
-}
+const FIELD_IDS = { isbn: 'isbn', ...BOOK_FIELD_IDS }
 
 // Erfassen über ISBN: /erfassen (aus einer leeren Reihe: /erfassen?slot=17)
 // Ablauf: ISBN eintippen -> "Daten holen" füllt das Formular -> prüfen,
@@ -76,14 +67,12 @@ export default function AddBookIsbnPage() {
     useEffect(() => () => lookupController.current?.abort(), [])
 
     // Standort aus ?slot=, den es nicht (mehr) gibt, gilt als nicht gewählt
-    const slotValue = slotGroups.some((group) => group.options.some((option) => String(option.id) === book.shelfSlotId))
-        ? book.shelfSlotId
-        : ''
+    const slotValue = validSlotValue(slotGroups, book.shelfSlotId)
 
     const onlineCover = lookup.status === 'done' ? lookup.result.cover : null
 
     // Speichern erst, wenn die Pflichtfelder stehen (wie in Erfassen-Manuell.html)
-    const missing = [!book.title.trim() && 'Titel', !book.author.trim() && 'Autor', !slotValue && 'Standort'].filter(Boolean)
+    const missing = missingRequired(book, slotValue)
     let blockedReason = null
     if (lookup.status === 'loading') blockedReason = 'Warte auf den Abruf …'
     else if (cover.uploading) blockedReason = 'Warte auf das Bild …'
@@ -160,8 +149,9 @@ export default function AddBookIsbnPage() {
     }
 
     async function handleUpload(file) {
-        if (file.size > MAX_COVER_BYTES) {
-            setCover((prev) => ({ ...prev, error: 'Das Bild ist grösser als 10 MB. Bitte ein kleineres wählen.' }))
+        const problem = coverFileProblem(file)
+        if (problem) {
+            setCover((prev) => ({ ...prev, error: problem }))
             return
         }
 
@@ -183,7 +173,7 @@ export default function AddBookIsbnPage() {
         const { payload, errors: inputErrors } = buildPayload({ isbn, book, slotValue, cover, onlineCover })
         if (inputErrors) {
             setErrors(inputErrors)
-            focusFirstError(inputErrors)
+            focusFirstError(inputErrors, FIELD_IDS)
             return
         }
 
@@ -211,7 +201,7 @@ export default function AddBookIsbnPage() {
             setCover((prev) => ({ ...prev, error: coverTempId }))
         }
         setErrors(fieldErrors)
-        focusFirstError(fieldErrors)
+        focusFirstError(fieldErrors, FIELD_IDS)
 
         // Fehler ohne passendes Feld (Server weg, 500, ...) oben am Knopf zeigen
         const shown = Object.keys(fieldErrors).some((key) => key in FIELD_IDS) || coverTempId
@@ -315,35 +305,6 @@ export default function AddBookIsbnPage() {
     )
 }
 
-// Grüne Box oben nach dem Speichern, mit Weg zur Reihe und zum Buch
-function SavedNotice({ result }) {
-    const { book, warnings = [] } = result
-    const duplicate = warnings.some((warning) => warning.code === 'DUPLICATE_ISBN')
-    const coverFailed = warnings.some((warning) => warning.code === 'COVER_NOT_SAVED')
-    const place = [book.location.room, placeLabel(book.location)].filter(Boolean).join(', ')
-
-    return (
-        <Notice
-            variant={coverFailed ? 'caution' : 'success'}
-            title={`„${book.title}“ ist gespeichert, in ${place}`}
-            action={
-                <>
-                    <Link to={`/regal/${book.location.slotId}`} className="btn btn-secondary">
-                        Zur Reihe
-                    </Link>
-                    <Link to={`/buecher/${book.id}`} className="btn btn-secondary">
-                        Buch ansehen
-                    </Link>
-                </>
-            }
-        >
-            {duplicate && 'Ein weiteres Exemplar, die ISBN stand schon im Bestand. '}
-            {coverFailed && 'Das Cover wurde nicht gespeichert, es lässt sich im Buchdetail nachtragen. '}
-            Das Formular ist leer für das nächste Buch.
-        </Notice>
-    )
-}
-
 // ---------- Hilfsfunktionen ----------
 
 // data aus GET /api/isbn -> Formularwerte (alles Strings).
@@ -377,21 +338,11 @@ function joinTitle(title, subtitle) {
 
 // Formular -> Body für POST /api/books. Prüft, was das Backend sonst mit 400 ablehnen würde.
 function buildPayload({ isbn, book, slotValue, cover, onlineCover }) {
-    const errors = {}
+    const { fields, errors } = bookPayloadFields(book, slotValue)
 
     const check = checkIsbn(isbn)
     if (check.state !== 'empty' && check.state !== 'valid') {
         errors.isbn = isbnProblem(check)
-    }
-
-    const publishedYear = parseOptionalInt(book.publishedYear)
-    if (publishedYear === undefined || (publishedYear !== null && (publishedYear < 1400 || publishedYear > 2100))) {
-        errors.publishedYear = 'Jahr mit vier Ziffern, zwischen 1400 und 2100'
-    }
-
-    const pages = parseOptionalInt(book.pages)
-    if (pages === undefined || pages === 0) {
-        errors.pages = 'Nur Ziffern, mindestens 1'
     }
 
     const coverTempId =
@@ -404,41 +355,9 @@ function buildPayload({ isbn, book, slotValue, cover, onlineCover }) {
     return {
         errors: null,
         payload: {
+            ...fields,
             isbn: check.state === 'valid' ? check.isbn : null,
-            title: book.title.trim(),
-            author: book.author.trim(),
-            publisher: book.publisher.trim() || null,
-            publishedYear,
-            language: book.language || null,
-            pages,
-            note: book.note.trim() || null,
-            shelfSlotId: Number(slotValue),
             coverTempId: coverTempId ?? null,
         },
     }
-}
-
-// "" -> null, "320" -> 320, "32a" -> undefined (ungültig)
-function parseOptionalInt(value) {
-    const trimmed = value.trim()
-    if (trimmed === '') return null
-    if (!/^\d+$/.test(trimmed)) return undefined
-    return Number(trimmed)
-}
-
-function uploadErrorMessage(error) {
-    if (error.status === 413) return 'Das Bild ist grösser als 10 MB. Bitte ein kleineres wählen.'
-    if (error.status === 400) return error.fields?.file ?? error.message
-    return `Hochladen hat nicht geklappt: ${error.message}`
-}
-
-function focusFirstError(errors) {
-    const key = Object.keys(FIELD_IDS).find((name) => errors[name])
-    if (key) document.getElementById(FIELD_IDS[key])?.focus()
-}
-
-function omit(object, keys) {
-    const copy = { ...object }
-    for (const key of keys) delete copy[key]
-    return copy
 }

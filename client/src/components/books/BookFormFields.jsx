@@ -9,7 +9,9 @@ import './BookFormFields.css'
 // errors:    { title: 'Pflichtfeld', ... }
 // onChange:  (name, value) => void
 // locations: { groups, loading, error, reload } für das Standort-Dropdown
-export default function BookFormFields({ values, errors, onChange, locations }) {
+
+// placeholders: optionale Platzhalter { title, author, note } (Erfassen ohne ISBN zeigt Beispiele)
+export default function BookFormFields({ values, errors, onChange, locations, placeholders = {} }) {
     function bind(name) {
         return {
             name,
@@ -98,7 +100,7 @@ export default function BookFormFields({ values, errors, onChange, locations }) 
                         {...bind('note')}
                         rows={2}
                         className="input field-input"
-                        placeholder="Freitext, zum Beispiel Geschenk von Anna"
+                        placeholder={placeholders.note ?? 'Freitext'}
                         maxLength={5000}
                     />
                 )}
