@@ -1,0 +1,53 @@
+﻿/* .side-card kommt aus AddBookIsbnPage.css */
+
+.required-fields {
+    gap: 10px;
+}
+
+.required-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.required-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 12.5px;
+    color: var(--text);
+}
+
+/* Offen: kleiner blauer Punkt wie im Mockup. Erledigt: grüner Kreis mit Haken. */
+.required-dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+}
+.required-dot::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--accent);
+}
+
+.required-item.is-done {
+    color: var(--success-text);
+}
+.required-item.is-done .required-dot {
+    border-radius: 50%;
+    background: var(--success-soft);
+    border: 1px solid var(--success-border);
+    box-sizing: border-box;
+    color: var(--success-icon);
+}
+.required-item.is-done .required-dot::before {
+    content: none;
+}
