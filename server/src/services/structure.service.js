@@ -1,0 +1,174 @@
+﻿import { ConflictError, NotFoundError, ValidationError } from '../errors/AppError.js'
+import { withTransaction } from '../db/transaction.js'
+import * as structureRepository from '../repositories/structure.repository.js'
+
+const NAME_MAX_LENGTH = 60
+
+// ---------------------------------------------------------------------------
+// Helper
+// ---------------------------------------------------------------------------
+
+// Leerzeichen am Rand weg, mehrere Leerzeichen zu einem
+function cleanName(value, field) {
+    if (typeof value !== 'string' || value.trim() === '') {
+        throw new ValidationError({ [field]: 'Bitte einen Namen eingeben' })
+    }
+    const name = value.trim().replace(/\s+/g, ' ')
+    if (name.length > NAME_MAX_LENGTH) {
+        throw new ValidationError({ [field]: `Höchstens ${NAME_MAX_LENGTH} Zeichen` })
+    }
+    return name
+}
+
+function parseId(value, field = 'id') {
+    const id = Number(value)
+    if (!Number.isInteger(id) || id <= 0) {
+        throw new ValidationError({ [field]: 'Muss eine positive Ganzzahl sein' })
+    }
+    return id
+}
+
+// ?moveTo=12 -> 12, fehlt -> null
+function parseMoveTo(query = {}) {
+    if (query.moveTo === undefined || query.moveTo === '') return null
+    return parseId(query.moveTo, 'moveTo')
+}
+
+// 23505 = unique_violation (Name schon vergeben)
+function isUniqueViolation(err) {
+    return err.code === '23505'
+}
+
+// ---------------------------------------------------------------------------
+// Umbenennen
+// ---------------------------------------------------------------------------
+
+// PATCH /api/rooms/:name   Body: { "name": "Stube" }
+export async function renameRoom(oldName, body = {}) {
+    const name = cleanName(body.name, 'name')
+    if (name === oldName) return { room: name }
+
+    if (await structureRepository.otherRoomExists(name, oldName)) {
+        throw new ConflictError('Diesen Raum gibt es schon', { name: 'Diesen Raum gibt es schon' })
+    }
+
+    const changed = await structureRepository.renameRoom(oldName, name)
+    if (changed === 0) throw new NotFoundError(`Raum «${oldName}» nicht gefunden`)
+
+    return { room: name }
+}
+
+// PATCH /api/furniture/:id   Body: { "name": "Regal B" }
+export async function renameFurniture(idParam, body = {}) {
+    const id = parseId(idParam)
+    const name = cleanName(body.name, 'name')
+
+    try {
+        const row = await structureRepository.renameFurniture(id, name)
+        if (!row) throw new NotFoundError(`Möbelstück ${id} nicht gefunden`)
+        return row
+    } catch (err) {
+        if (isUniqueViolation(err)) {
+            throw new ConflictError('Diesen Namen gibt es schon', { name: 'Ein anderes Möbelstück heisst schon so' })
+        }
+        throw err
+    }
+}
+
+// PATCH /api/slots/:id   Body: { "label": "Oben" }
+export async function renameSlot(idParam, body = {}) {
+    const id = parseId(idParam)
+    const label = cleanName(body.label, 'label')
+
+    try {
+        const row = await structureRepository.renameSlot(id, label)
+        if (!row) throw new NotFoundError(`Fach ${id} nicht gefunden`)
+        return row
+    } catch (err) {
+        if (isUniqueViolation(err)) {
+            throw new ConflictError('Diesen Namen gibt es schon', { label: 'Ein anderes Fach in diesem Möbel heisst schon so' })
+        }
+        throw err
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Löschen
+// Bücher werden nie gelöscht. Stehen noch welche in den betroffenen
+// Fächern, muss ?moveTo=<Fach-ID> angegeben werden, sonst 409 HAS_BOOKS.
+// ---------------------------------------------------------------------------
+
+// DELETE /api/rooms/:name?moveTo=12
+export async function deleteRoom(room, query) {
+    const moveTo = parseMoveTo(query)
+
+    return withTransaction(async (client) => {
+        const furnitureIds = await structureRepository.lockFurnitureInRoom(client, room)
+        if (furnitureIds.length === 0) throw new NotFoundError(`Raum «${room}» nicht gefunden`)
+
+        const slotIds = await structureRepository.lockSlotsOfFurniture(client, furnitureIds)
+        return removeAndMoveBooks(client, { furnitureIds, slotIds }, moveTo)
+    })
+}
+
+// DELETE /api/furniture/:id?moveTo=12
+export async function deleteFurniture(idParam, query) {
+    const id = parseId(idParam)
+    const moveTo = parseMoveTo(query)
+
+    return withTransaction(async (client) => {
+        const furnitureIds = await structureRepository.lockFurniture(client, id)
+        if (furnitureIds.length === 0) throw new NotFoundError(`Möbelstück ${id} nicht gefunden`)
+
+        const slotIds = await structureRepository.lockSlotsOfFurniture(client, furnitureIds)
+        return removeAndMoveBooks(client, { furnitureIds, slotIds }, moveTo)
+    })
+}
+
+// DELETE /api/slots/:id?moveTo=12
+export async function deleteSlot(idParam, query) {
+    const id = parseId(idParam)
+    const moveTo = parseMoveTo(query)
+
+    return withTransaction(async (client) => {
+        const slotIds = await structureRepository.lockSlots(client, [id])
+        if (slotIds.length === 0) throw new NotFoundError(`Fach ${id} nicht gefunden`)
+
+        return removeAndMoveBooks(client, { furnitureIds: [], slotIds }, moveTo)
+    })
+}
+
+// Bücher umziehen (falls nötig), dann Fächer und Möbel löschen
+async function removeAndMoveBooks(client, { furnitureIds, slotIds }, moveTo) {
+    const bookCount = await structureRepository.countBooksInSlots(client, slotIds)
+    let movedBooks = 0
+
+    if (bookCount > 0) {
+        if (moveTo === null) {
+            const books = bookCount === 1 ? '1 Buch' : `${bookCount} Bücher`
+            throw new ConflictError(
+                `Hier stehen noch ${books}. Bitte ein Fach wählen, in das sie umziehen.`,
+                { moveTo: 'Bitte ein Fach wählen' },
+                'HAS_BOOKS'
+            )
+        }
+        if (slotIds.includes(moveTo)) {
+            throw new ValidationError({ moveTo: 'Dieses Fach wird ebenfalls gelöscht' })
+        }
+        const target = await structureRepository.lockSlots(client, [moveTo])
+        if (target.length === 0) {
+            throw new ValidationError({ moveTo: 'Fach nicht gefunden' })
+        }
+        movedBooks = await structureRepository.moveBooks(client, slotIds, moveTo)
+    }
+
+    await structureRepository.deleteSlots(client, slotIds)
+    await structureRepository.deleteFurniture(client, furnitureIds)
+
+    return {
+        deletedFurniture: furnitureIds.length,
+        deletedSlots: slotIds.length,
+        movedBooks,
+        movedTo: movedBooks > 0 ? moveTo : null,
+    }
+}
