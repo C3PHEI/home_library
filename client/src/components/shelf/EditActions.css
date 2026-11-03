@@ -1,0 +1,42 @@
+﻿/* Stift und Papierkorb (EditActions.jsx) */
+
+.edit-actions {
+    display: inline-flex;
+    flex: none;
+    gap: 4px;
+}
+
+.edit-btn {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid #DED9CC;
+    border-radius: 9px;
+    background: #FAF8F1;
+    color: var(--secondary-text);
+    cursor: pointer;
+    transition: background 0.16s, border-color 0.16s, color 0.16s;
+}
+
+.edit-btn:hover {
+    background: #EEE9DC;
+}
+
+.edit-btn-danger {
+    color: var(--danger);
+}
+
+.edit-btn-danger:hover {
+    background: var(--danger-soft);
+    border-color: var(--danger-border);
+}
+
+/* Auf dem iPad grössere Trefferfläche */
+@media (pointer: coarse) {
+    .edit-btn {
+        width: 38px;
+        height: 38px;
+    }
+}
