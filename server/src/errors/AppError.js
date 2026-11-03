@@ -19,3 +19,11 @@ export class ValidationError extends AppError {
         super(400, 'VALIDATION', message, fields)
     }
 }
+
+// 409: Anfrage passt nicht zum aktuellen Stand (Name schon vergeben,
+// im Fach stehen noch Bücher ...)
+export class ConflictError extends AppError {
+    constructor(message, fields, code = 'CONFLICT') {
+        super(409, code, message, fields)
+    }
+}
