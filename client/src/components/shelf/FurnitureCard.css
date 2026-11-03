@@ -28,6 +28,11 @@
 
 /* Bei Möbeln mit Fächern ist der Kopf ein Button */
 .furniture-toggle {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
     padding: 0;
     border: 0;
     background: none;
@@ -36,6 +41,7 @@
     text-align: left;
     cursor: pointer;
 }
+
 .furniture-toggle:focus-visible,
 .furniture-single:focus-visible {
     outline: 3px solid var(--brass);

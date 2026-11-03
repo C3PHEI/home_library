@@ -2,15 +2,28 @@
 import { Archive, BookOpen, ChevronDown, ChevronRight, DoorOpen, Layers, Moon, Sofa } from 'lucide-react'
 import { furnitureTypeLabel } from '../../utils/furniture.js'
 import { plural } from '../../utils/format.js'
+import { furnitureTarget, slotTarget } from '../../utils/structure.js'
+import EditActions from './EditActions.jsx'
 import './FurnitureCard.css'
 
 // Ein Möbel in der Übersicht.
 // - Nur ein Fach (Tisch, Nachttisch): die ganze Karte führt zum Fach.
 // - Mehrere Fächer: Kopf klappt die Liste der Fächer auf und zu.
-export default function FurnitureCard({ furniture, open, onToggle }) {
+// editing: Bearbeiten-Modus. Dann gibt es Stift und Papierkorb, und Karten
+// und Fächer sind keine Links, damit ein Klick daneben nicht wegführt.
+// onEdit(kind, target): kind ist 'rename' oder 'delete', target aus utils/structure.js
+export default function FurnitureCard({ furniture, open, onToggle, editing = false, onEdit }) {
     const { slots } = furniture
 
-    if (slots.length === 1) {
+    const actions = editing && (
+        <EditActions
+            name={furniture.name}
+            onRename={() => onEdit('rename', furnitureTarget(furniture))}
+            onDelete={() => onEdit('delete', furnitureTarget(furniture))}
+        />
+    )
+
+    if (slots.length === 1 && !editing) {
         return (
             <Link to={`/regal/${slots[0].id}`} className="furniture-card furniture-single card">
                 <div className="furniture-heading">
@@ -22,12 +35,18 @@ export default function FurnitureCard({ furniture, open, onToggle }) {
         )
     }
 
-    if (slots.length === 0) {
+    // Ein Fach im Bearbeiten-Modus, oder gar keine Fächer
+    if (slots.length <= 1) {
         return (
             <div className="furniture-card card">
                 <div className="furniture-heading">
                     <FurnitureHead furniture={furniture} />
-                    <span className="furniture-total">Keine Fächer angelegt</span>
+                    {slots.length === 1 ? (
+                        <CountPill count={furniture.bookCount} />
+                    ) : (
+                        <span className="furniture-total">Keine Fächer angelegt</span>
+                    )}
+                    {actions}
                 </div>
             </div>
         )
@@ -37,32 +56,50 @@ export default function FurnitureCard({ furniture, open, onToggle }) {
 
     return (
         <section className={open ? 'furniture-card card is-expanded' : 'furniture-card card'}>
-            <button
-                type="button"
-                className="furniture-heading furniture-toggle"
-                aria-expanded={open}
-                aria-controls={listId}
-                onClick={onToggle}
-            >
-                <FurnitureHead furniture={furniture} />
-                <span className="furniture-total">
-                    {plural(furniture.bookCount, 'Buch', 'Bücher')} · {plural(slots.length, 'Fach', 'Fächer')}
-                </span>
-                <ChevronDown className="furniture-toggle-icon" size={17} aria-hidden="true" />
-            </button>
+            <div className="furniture-heading">
+                <button
+                    type="button"
+                    className="furniture-toggle"
+                    aria-expanded={open}
+                    aria-controls={listId}
+                    onClick={onToggle}
+                >
+                    <FurnitureHead furniture={furniture} />
+                    <span className="furniture-total">
+                        {plural(furniture.bookCount, 'Buch', 'Bücher')} · {plural(slots.length, 'Fach', 'Fächer')}
+                    </span>
+                    <ChevronDown className="furniture-toggle-icon" size={17} aria-hidden="true" />
+                </button>
+                {actions}
+            </div>
 
             <div className="compartment-list" id={listId} hidden={!open}>
-                {slots.map((slot) => (
-                    <Link
-                        key={slot.id}
-                        to={`/regal/${slot.id}`}
-                        className={slot.bookCount === 0 ? 'compartment-card is-empty' : 'compartment-card'}
-                    >
-                        <Layers className="compartment-icon" size={16} aria-hidden="true" />
-                        <span className="compartment-name">{slot.label}</span>
-                        <CountPill count={slot.bookCount} />
-                    </Link>
-                ))}
+                {slots.map((slot) =>
+                    editing ? (
+                        <div
+                            key={slot.id}
+                            className={slot.bookCount === 0 ? 'compartment-card is-editing is-empty' : 'compartment-card is-editing'}
+                        >
+                            <Layers className="compartment-icon" size={16} aria-hidden="true" />
+                            <span className="compartment-name">{slot.label}</span>
+                            <EditActions
+                                name={`${slot.label} in ${furniture.name}`}
+                                onRename={() => onEdit('rename', slotTarget(slot, furniture))}
+                                onDelete={() => onEdit('delete', slotTarget(slot, furniture))}
+                            />
+                        </div>
+                    ) : (
+                        <Link
+                            key={slot.id}
+                            to={`/regal/${slot.id}`}
+                            className={slot.bookCount === 0 ? 'compartment-card is-empty' : 'compartment-card'}
+                        >
+                            <Layers className="compartment-icon" size={16} aria-hidden="true" />
+                            <span className="compartment-name">{slot.label}</span>
+                            <CountPill count={slot.bookCount} />
+                        </Link>
+                    ),
+                )}
             </div>
         </section>
     )
