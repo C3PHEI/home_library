@@ -9,7 +9,6 @@ export default function BookTile({ book, from }) {
             <BookCover src={book.coverThumbUrl} variant="tile" />
             <span className="book-tile-title">{book.title}</span>
             {book.author && <span className="book-tile-author">{book.author}</span>}
-            {book.loanedTo && <span className="book-loaned">Verliehen an {book.loanedTo}</span>}
         </Link>
     )
 }

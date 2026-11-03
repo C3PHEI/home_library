@@ -16,7 +16,6 @@ export default function SearchHit({ book, from }) {
                 <span className="search-hit-title">{book.title}</span>
                 <span className="search-hit-author">{book.author}</span>
                 <span className="search-hit-isbn">{book.isbn13 ?? 'keine ISBN erfasst'}</span>
-                {book.loanedTo && <span className="book-loaned">Verliehen an {book.loanedTo}</span>}
             </span>
 
             <span className="search-hit-location">
