@@ -1,10 +1,6 @@
-﻿/* .page und .page-title kommen aus ShelfOverviewPage.css */
+﻿/* .page-title kommt aus components/PageHead.css */
 
-/* Mockup: 24 px Abstand oben, Formular höchstens 760 px breit */
-.search-page {
-    padding-top: 24px;
-}
-
+/* Formular höchstens 760 px breit */
 .search-head {
     max-width: 760px;
     margin-bottom: 14px;
@@ -76,8 +72,4 @@
 .search-page .state-error {
     max-width: 760px;
     box-sizing: border-box;
-}
-
-@media (max-width: 760px) {
-    .search-page { padding-top: 16px; }
 }

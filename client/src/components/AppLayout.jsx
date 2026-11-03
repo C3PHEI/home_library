@@ -1,11 +1,42 @@
-﻿import { useState } from 'react'
-import { Link, NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+﻿import { Link, Outlet, useLocation } from 'react-router-dom'
+import { BookOpen, House, Library, Plus, Search } from 'lucide-react'
 import './AppLayout.css'
 
+// Hauptnavigation. match: wann der Eintrag als aktiv gilt.
+const NAV_ITEMS = [
+    {
+        to: '/',
+        label: 'Übersicht',
+        icon: House,
+        // Bleibt aktiv, wenn ein Fach geöffnet ist (/regal/12)
+        match: (path) => path === '/' || path.startsWith('/regal'),
+    },
+    {
+        to: '/suche',
+        label: 'Buch finden',
+        icon: Search,
+        match: (path) => path.startsWith('/suche'),
+    },
+    {
+        to: '/buecher',
+        label: 'Alle Bücher',
+        icon: Library,
+        match: (path) => path.startsWith('/buecher'),
+    },
+    {
+        to: '/erfassen',
+        label: 'Buch hinzufügen',
+        icon: Plus,
+        // Auch "ohne ISBN" (/erfassen/ohne-isbn)
+        match: (path) => path.startsWith('/erfassen'),
+    },
+]
+
+// Gerüst wie im neuen Mock: Seitenleiste links, auf dem Handy als Leiste unten.
 export default function AppLayout() {
     return (
-        <div className="app">
-            <AppHeader />
+        <div className="app-shell">
+            <Sidebar />
             <main className="app-main">
                 <Outlet />
             </main>
@@ -13,73 +44,48 @@ export default function AppLayout() {
     )
 }
 
-function AppHeader() {
+function Sidebar() {
     const { pathname } = useLocation()
-    // "Regal" bleibt aktiv, auch wenn eine Reihe geoeffnet ist
-    const shelfActive = pathname === '/' || pathname.startsWith('/regal')
-    // Die Suchseite hat ihr eigenes grosses Suchfeld, oben keins (wie im Mockup)
-    const onSearchPage = pathname === '/suche'
-    const onAddPage = pathname.startsWith('/erfassen')
 
     return (
-        <header className="app-header">
+        <aside className="sidebar">
             <Link to="/" className="brand">
-                <span className="brand-title">Bibliothek</span>
-                <span className="brand-subtitle">Buchsammlung zuhause</span>
+                <span className="brand-mark" aria-hidden="true">
+                    <BookOpen size={20} />
+                </span>
+                <span className="brand-text">
+                    <span className="brand-name">Bibliothek</span>
+                    <span className="brand-sub">Unser Zuhause in Büchern</span>
+                </span>
             </Link>
 
-            <nav className="main-nav" aria-label="Hauptnavigation">
-                <NavLink to="/" className={() => navClass(shelfActive)}>
-                    Regal
-                </NavLink>
-                <NavLink to="/buecher" className={({ isActive }) => navClass(isActive)}>
-                    Alle Bücher
-                </NavLink>
+            <div className="nav-caption" id="nav-caption">
+                Meine Sammlung
+            </div>
+
+            <nav className="nav-list" aria-labelledby="nav-caption">
+                {NAV_ITEMS.map(({ to, label, icon: Icon, match }) => {
+                    // Aktiv-Zustand selbst berechnen, damit auch Unterseiten zählen
+                    const active = match(pathname)
+                    return (
+                        <Link
+                            key={to}
+                            to={to}
+                            className={active ? 'nav-link is-active' : 'nav-link'}
+                            aria-current={active ? 'page' : undefined}
+                        >
+                            <Icon size={18} aria-hidden="true" />
+                            <span className="nav-label">{label}</span>
+                        </Link>
+                    )
+                })}
             </nav>
 
-            {onSearchPage ? <div className="header-spacer" /> : <SearchForm />}
-
-            <Link
-                to="/erfassen"
-                className={onAddPage ? 'btn btn-primary is-active' : 'btn btn-primary'}
-                aria-current={onAddPage ? 'page' : undefined}
-            >
-                Buch erfassen
-            </Link>
-        </header>
-    )
-}
-
-function navClass(active) {
-    return active ? 'nav-link is-active' : 'nav-link'
-}
-
-function SearchForm() {
-    const navigate = useNavigate()
-    const [searchParams] = useSearchParams()
-    // Auf der Suchseite steht der Suchbegriff schon in der URL (?q=...)
-    const [query, setQuery] = useState(searchParams.get('q') ?? '')
-
-    function handleSubmit(event) {
-        event.preventDefault()
-        const q = query.trim()
-        if (!q) return
-        navigate(`/suche?q=${encodeURIComponent(q)}`)
-    }
-
-    return (
-        <form className="search-form" role="search" onSubmit={handleSubmit}>
-            <label htmlFor="global-search" className="visually-hidden">
-                Titel, Autor oder ISBN suchen
-            </label>
-            <input
-                id="global-search"
-                type="search"
-                className="input"
-                placeholder="Titel, Autor oder ISBN"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-            />
-        </form>
+            <p className="side-foot">
+                <strong>Ein gutes Buch</strong>
+                <br />
+                findet immer wieder heim.
+            </p>
+        </aside>
     )
 }
