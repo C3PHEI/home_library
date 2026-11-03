@@ -1,111 +1,108 @@
-﻿.page {
-    padding: 20px 24px 24px;
+﻿/* Startseite (ShelfOverviewPage.jsx). Seitenkopf: components/PageHead.css,
+   Möbelkarten: components/shelf/FurnitureCard.css */
+
+/* ---------- Zahlen ---------- */
+
+.stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin: 22px 0 34px;
 }
 
-.page-head {
+.stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 19px;
+}
+
+.stat-number {
+    font: 500 30px var(--serif);
+    color: var(--accent);
+}
+
+.stat-label {
+    margin-top: 2px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.stat-icon {
+    flex: none;
+    color: #A68A5A;
+}
+
+/* ---------- Abschnittstitel "Wo stehen unsere Bücher?" ---------- */
+
+.section-title {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 12px 16px;
-    margin-bottom: 12px;
+    gap: 16px;
+    margin: 28px 0 22px;
 }
 
-.page-title {
-    margin: 0;
-    font-size: 22px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-}
-
-.page-lead {
+.section-title h2 {
     margin: 4px 0 0;
-    font-size: 26px;
-    color: var(--text-muted);
 }
 
-.page-back {
-    margin: 40px 0 0;
-    font-size: 24px;
-}
-
-.room {
-    margin-bottom: 22px;
-}
-
-.room-title {
-    margin: 0 0 10px;
+.section-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
     font-size: 12px;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-muted);
+    color: var(--accent);
 }
 
-/* Karten 224 px breit wie im Mockup, brechen automatisch um */
-.furniture-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, 224px);
-    gap: 16px;
-    align-items: start;
+/* ---------- Räume ---------- */
+
+.room-section {
+    margin-bottom: 26px;
 }
 
-/* Reihe ausgewählt (Desktop): Übersicht links schmal, Bücherliste rechts */
-.shelf-layout.has-panel {
-    display: flex;
-    align-items: flex-start;
-    gap: 24px;
-}
-
-/* 4 Karten à 141 px + 3 Abstände = 612 px wie im Mockup */
-.has-panel .shelf-rooms {
-    flex: 0 0 612px;
-    min-width: 0;
-}
-
-.has-panel .furniture-grid {
-    grid-template-columns: repeat(auto-fill, 141px);
-}
-
-.shelf-panel-column {
-    flex: 1 1 auto;
-    min-width: 0;
-    position: sticky;
-    top: 80px;
-}
-
-/* Handy: Bücherliste als eigene Zeile unter dem Möbel */
-.shelf-panel-inline {
-    grid-column: 1 / -1;
-}
-
-.shelf-panel-top {
-    margin-bottom: 22px;
-}
-
-.state-message {
+.room-heading {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin: 24px 0;
-    font-size: 14px;
+    gap: 10px;
+    margin-bottom: 10px;
+    color: var(--accent);
+}
+
+.room-heading h2 {
+    margin: 0;
+    font-size: 23px;
+}
+
+.room-count {
+    font-size: 12px;
+    color: #838575;
+}
+
+.furniture-list {
+    display: grid;
+    gap: 8px;
+}
+
+.room-empty {
+    padding: 18px;
+    border: 1px dashed var(--slot-empty-border);
+    border-radius: 14px;
+    background: var(--surface-muted);
+    font-size: 13px;
     color: var(--text-muted);
 }
 
-.state-error {
-    padding: 12px 14px;
-    border: 1px solid var(--danger-border);
-    border-radius: var(--radius);
-    background: var(--danger-soft);
-    color: var(--danger);
-}
-
-/* Mittlere Breite: nur 2 Karten nebeneinander, damit die Liste Platz hat */
-@media (max-width: 1100px) {
-    .has-panel .shelf-rooms { flex-basis: 298px; }
-}
-
-@media (max-width: 760px) {
-    .page { padding: 16px; }
-    .furniture-grid { grid-template-columns: 1fr; }
+/* iPad hochkant: Zahlen kompakter, damit drei nebeneinander passen */
+@media (max-width: 900px) {
+    .stat {
+        padding: 14px 15px;
+    }
+    .stat-number {
+        font-size: 26px;
+    }
+    .stat-icon {
+        display: none;
+    }
 }

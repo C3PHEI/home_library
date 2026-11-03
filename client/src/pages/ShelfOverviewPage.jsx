@@ -1,118 +1,147 @@
-﻿import { Fragment } from 'react'
-import { Outlet, useMatch } from 'react-router-dom'
+﻿import { Link } from 'react-router-dom'
+import {
+    ArrowUpRight,
+    BookOpen,
+    BriefcaseBusiness,
+    House,
+    Library,
+    MapPin,
+    Moon,
+    Sofa,
+} from 'lucide-react'
 import { getLocations } from '../api/locations.js'
 import { useApi } from '../hooks/useApi.js'
-import { MOBILE_QUERY, useMediaQuery } from '../hooks/useMediaQuery.js'
-import { plural } from '../utils/format.js'
+import { useStoredState } from '../hooks/useStoredState.js'
+import { formatCount, plural } from '../utils/format.js'
+import PageHead from '../components/PageHead.jsx'
 import FurnitureCard from '../components/shelf/FurnitureCard.jsx'
-import Legend from '../components/shelf/Legend.jsx'
 import './ShelfOverviewPage.css'
 
-// Regalübersicht. Unter /regal/:slotId öffnet die Bücherliste der Reihe
-// (Unterroute, <Outlet />) ohne Seitenwechsel: rechts daneben auf dem Desktop,
-// auf dem Handy direkt unter dem Möbel.
+// Startseite: Zahlen oben, darunter alle Räume mit ihren Möbeln.
+// Ein Möbel mit mehreren Fächern klappt auf, eines mit nur einem Fach
+// führt direkt zur Fachseite (/regal/:slotId).
 export default function ShelfOverviewPage() {
     const { data, error, loading, reload } = useApi(getLocations)
-    const match = useMatch('/regal/:slotId')
-    const selectedSlotId = match ? Number(match.params.slotId) : null
-    const hasSelection = selectedSlotId !== null
-    const isMobile = useMediaQuery(MOBILE_QUERY)
 
-    const selection = data && hasSelection ? findSlot(data.rooms, selectedSlotId) : null
+    // Welches Möbel aufgeklappt ist. Bleibt gemerkt, damit es nach
+    // "Zurück" von der Fachseite noch offen ist. Immer nur eines offen.
+    const [openId, setOpenId] = useStoredState('bibliothek.uebersicht.offen', null)
 
-    const panelBeside = hasSelection && !isMobile
-    const panelUnderFurniture = hasSelection && isMobile && selection !== null
-    // Handy, Reihe nicht in der Übersicht (z. B. falsche Adresse): Panel oben zeigen
-    const panelOnTop = hasSelection && isMobile && (error || (data && !selection))
+    function handleToggle(furnitureId) {
+        setOpenId(openId === furnitureId ? null : furnitureId)
+    }
 
     return (
-        <div className="page">
-            <div className="page-head">
-                <div>
-                    <h1 className="page-title">Regalübersicht</h1>
-                    <p className="page-lead">{leadText(data, selection)}</p>
+        <div className="page overview-page">
+            <PageHead
+                eyebrow="Willkommen daheim"
+                title="Unsere kleine Bibliothek"
+                lead="Alles an seinem Platz. Und jedes Buch nur einen Augenblick entfernt."
+                actions={
+                    <Link to="/erfassen" className="btn btn-primary">
+                        <BookOpen size={17} aria-hidden="true" />
+                        Buch hinzufügen
+                    </Link>
+                }
+            />
+
+            {loading && !data && <p className="state-message">Regale werden geladen …</p>}
+
+            {error && (
+                <div className="state-message state-error" role="alert">
+                    <span>Die Regale konnten nicht geladen werden: {error.message}</span>
+                    <button type="button" className="btn btn-secondary" onClick={reload}>
+                        Nochmals versuchen
+                    </button>
                 </div>
-                <Legend showSelected={hasSelection} />
-            </div>
+            )}
 
-            <div className={panelBeside ? 'shelf-layout has-panel' : 'shelf-layout'}>
-                <div className="shelf-rooms">
-                    {panelOnTop && (
-                        <div className="shelf-panel-top">
-                            <Outlet />
+            {data && (
+                <>
+                    <Stats totals={data.totals} />
+
+                    <div className="section-title">
+                        <div>
+                            <div className="eyebrow">Ein Blick durchs Haus</div>
+                            <h2>Wo stehen unsere Bücher?</h2>
                         </div>
-                    )}
-
-                    {loading && !data && <p className="state-message">Regale werden geladen …</p>}
-
-                    {error && (
-                        <div className="state-message state-error" role="alert">
-                            <span>Die Regale konnten nicht geladen werden: {error.message}</span>
-                            <button type="button" className="btn btn-secondary" onClick={reload}>
-                                Nochmals versuchen
-                            </button>
-                        </div>
-                    )}
-
-                    {data && data.rooms.length === 0 && (
-                        <p className="state-message">Noch keine Möbel erfasst.</p>
-                    )}
-
-                    {data?.rooms.map((room) => (
-                        <section key={room.room} className="room" aria-labelledby={roomId(room.room)}>
-                            <h2 id={roomId(room.room)} className="room-title">
-                                {room.room}
-                            </h2>
-                            <div className="furniture-grid">
-                                {room.furniture.map((furniture) => (
-                                    <Fragment key={furniture.id}>
-                                        <FurnitureCard
-                                            furniture={furniture}
-                                            selectedSlotId={selectedSlotId}
-                                            compact={panelBeside}
-                                        />
-                                        {panelUnderFurniture && selection.furniture.id === furniture.id && (
-                                            <div className="shelf-panel-inline">
-                                                <Outlet />
-                                            </div>
-                                        )}
-                                    </Fragment>
-                                ))}
-                            </div>
-                        </section>
-                    ))}
-                </div>
-
-                {panelBeside && (
-                    <div className="shelf-panel-column">
-                        <Outlet />
+                        <Link to="/buecher" className="section-link">
+                            Alle Bücher ansehen
+                            <ArrowUpRight size={15} aria-hidden="true" />
+                        </Link>
                     </div>
-                )}
-            </div>
+
+                    {data.rooms.length === 0 && (
+                        <p className="room-empty">Noch keine Möbel erfasst.</p>
+                    )}
+
+                    {data.rooms.map((room) => (
+                        <Room key={room.room} room={room} openId={openId} onToggle={handleToggle} />
+                    ))}
+                </>
+            )}
         </div>
     )
 }
 
-function leadText(data, selection) {
-    if (selection) {
-        return `${selection.slot.label} in ${selection.furniture.name} ist ausgewählt. Eine andere Reihe anklicken, um zu wechseln.`
-    }
-    if (!data) return 'Eine Reihe anklicken, um ihre Bücher zu sehen.'
+function Stats({ totals }) {
+    const items = [
+        { value: totals.furniture, label: 'Möbelstücke', icon: Library },
+        { value: totals.slots, label: 'Orte für Bücher', icon: MapPin },
+        { value: totals.books, label: 'Bücher eingetragen', icon: BookOpen },
+    ]
 
-    const { furniture, slots, books } = data.totals
-    return `${plural(furniture, 'Möbel', 'Möbel')}, ${plural(slots, 'Standort', 'Standorte')}, ${plural(books, 'Buch', 'Bücher')}. Eine Reihe anklicken, um ihre Bücher zu sehen.`
+    return (
+        <div className="stat-row">
+            {items.map(({ value, label, icon: Icon }) => (
+                <div key={label} className="card stat">
+                    <div>
+                        <div className="stat-number">{formatCount(value)}</div>
+                        <div className="stat-label">{label}</div>
+                    </div>
+                    <Icon className="stat-icon" size={22} aria-hidden="true" />
+                </div>
+            ))}
+        </div>
+    )
 }
 
-function findSlot(rooms, slotId) {
-    for (const room of rooms) {
-        for (const furniture of room.furniture) {
-            const slot = furniture.slots.find((s) => s.id === slotId)
-            if (slot) return { room, furniture, slot }
-        }
-    }
-    return null
+function Room({ room, openId, onToggle }) {
+    const slotCount = room.furniture.reduce((sum, furniture) => sum + furniture.slots.length, 0)
+    const headingId = `room-${room.room.toLowerCase().replace(/\s+/g, '-')}`
+
+    return (
+        <section className="room-section" aria-labelledby={headingId}>
+            <div className="room-heading">
+                <RoomIcon name={room.room} />
+                <h2 id={headingId}>{room.room}</h2>
+                <span className="room-count">
+                    {plural(room.furniture.length, 'Möbelstück', 'Möbelstücke')} · {plural(slotCount, 'Fach', 'Fächer')}
+                </span>
+            </div>
+
+            <div className="furniture-list">
+                {room.furniture.map((furniture) => (
+                    <FurnitureCard
+                        key={furniture.id}
+                        furniture={furniture}
+                        open={openId === furniture.id}
+                        onToggle={() => onToggle(furniture.id)}
+                    />
+                ))}
+            </div>
+        </section>
+    )
 }
 
-function roomId(name) {
-    return `room-${name.toLowerCase().replace(/\s+/g, '-')}`
+// Icon neben dem Raumnamen
+function RoomIcon({ name }) {
+    const lower = name.toLowerCase()
+    const props = { size: 19, 'aria-hidden': true }
+    if (lower.includes('wohn')) return <Sofa {...props} />
+    if (lower.includes('schlaf')) return <Moon {...props} />
+    if (lower.includes('büro') || lower.includes('buero') || lower.includes('arbeit')) {
+        return <BriefcaseBusiness {...props} />
+    }
+    return <House {...props} />
 }

@@ -1,7 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 import AppLayout from './components/AppLayout.jsx'
 import ShelfOverviewPage from './pages/ShelfOverviewPage.jsx'
-import SlotPanel from './components/shelf/SlotPanel.jsx'
+import SlotPage from './pages/SlotPage.jsx'
 import PlaceholderPage from './pages/PlaceholderPage.jsx'
 import SearchPage from './pages/SearchPage.jsx'
 import AddBookIsbnPage from './pages/AddBookIsbnPage.jsx'
@@ -11,11 +11,9 @@ export default function App() {
     return (
         <Routes>
             <Route element={<AppLayout />}>
-                {/* Übersicht bleibt stehen, die Reihe öffnet als Unterroute daneben */}
-                <Route element={<ShelfOverviewPage />}>
-                    <Route index />
-                    <Route path="regal/:slotId" element={<SlotPanel />} />
-                </Route>
+                <Route index element={<ShelfOverviewPage />} />
+                {/* Ein Fach (Reihe, Ablage) als eigene Seite */}
+                <Route path="regal/:slotId" element={<SlotPage />} />
 
                 <Route path="buecher" element={<PlaceholderPage title="Alle Bücher" />} />
                 <Route path="buecher/:bookId" element={<PlaceholderPage title="Buchdetail" />} />
