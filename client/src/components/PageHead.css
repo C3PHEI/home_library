@@ -1,0 +1,39 @@
+﻿/* Seitenkopf (PageHead.jsx). Die Klassen .page-head, .page-title und
+   .page-lead nutzen auch die Seiten, die noch nicht umgebaut sind. */
+
+.page-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px 18px;
+    margin-bottom: 28px;
+}
+
+.page-head-text {
+    min-width: 0;
+}
+
+/* Grösse und Schrift kommen von h1 (index.css) */
+.page-title {
+    margin: 7px 0;
+}
+
+.page-lead {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.page-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+@media (max-width: 700px) {
+    .page-head {
+        flex-direction: column;
+        align-items: flex-start;
+        margin-bottom: 22px;
+    }
+}
