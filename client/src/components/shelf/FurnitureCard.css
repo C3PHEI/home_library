@@ -109,6 +109,10 @@
     padding: 14px 16px 16px;
 }
 
+.is-expanded .furniture-toggle {
+    gap: 12px;
+}
+
 .is-expanded .furniture-heading {
     gap: 12px;
     padding-bottom: 13px;
@@ -177,6 +181,19 @@
     font-size: 13px;
     font-weight: 600;
     color: #445348;
+}
+
+/* Fach im Bearbeiten-Modus: kein Link, rechts Stift und Papierkorb */
+.compartment-card.is-editing {
+    padding: 6px 6px 6px 10px;
+}
+.compartment-card.is-editing:hover {
+    transform: none;
+    background: #F9F7F0;
+    border-color: #E8E2D6;
+}
+.compartment-card.is-editing.is-empty:hover {
+    background: var(--slot-empty);
 }
 
 /* ---------- Anzahl als Pille ---------- */
