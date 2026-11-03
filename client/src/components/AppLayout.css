@@ -31,15 +31,11 @@
 }
 .brand:hover { color: inherit; }
 
-.brand-mark {
-    display: grid;
-    place-items: center;
+.brand-logo {
     flex: none;
     width: 38px;
     height: 38px;
-    border: 1px solid #C9A66A;
-    border-radius: 50% 50% 45% 45%;
-    color: #E3C78F;
+    object-fit: contain;
 }
 
 .brand-text {

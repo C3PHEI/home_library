@@ -1,6 +1,7 @@
 ﻿import { Link, Outlet, useLocation } from 'react-router-dom'
-import { BookOpen, House, Library, Plus, Search } from 'lucide-react'
+import { House, Library, Plus, Search } from 'lucide-react'
 import './AppLayout.css'
+import buch from '../assets/buch.png'
 
 // Hauptnavigation. match: wann der Eintrag als aktiv gilt.
 const NAV_ITEMS = [
@@ -51,7 +52,7 @@ function Sidebar() {
         <aside className="sidebar">
             <Link to="/" className="brand">
                 <span className="brand-mark" aria-hidden="true">
-                    <BookOpen size={20} />
+                    <img className="brand-logo" src={buch} alt="" />
                 </span>
                 <span className="brand-text">
                     <span className="brand-name">Bibliothek</span>
