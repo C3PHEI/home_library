@@ -1,0 +1,85 @@
+﻿/* Fachseite (SlotPage.jsx). Seitenkopf: components/PageHead.css */
+
+/* "← Zur Übersicht" über dem Seitenkopf */
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 22px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+/* Sortierung links, Ansicht rechts */
+.slot-tools {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 0 0 20px;
+}
+
+.slot-sort {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.view-toggle {
+    display: flex;
+    gap: 8px;
+}
+
+/* Gewählte Ansicht: dunkelgrün */
+.view-toggle .icon-btn[aria-pressed='true'] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #FFF9ED;
+}
+
+.slot-books {
+    transition: opacity 120ms;
+}
+
+/* Neue Seite lädt: alte Bücher gedimmt stehen lassen */
+.slot-books.is-loading {
+    opacity: 0.55;
+}
+
+/* Kompakte Liste in einer Karte */
+.slot-page .book-list {
+    padding: 4px 16px;
+}
+
+/* Leeres Fach */
+.slot-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 28px 23px;
+    border: 1px dashed var(--slot-empty-border);
+    border-radius: 14px;
+    background: var(--surface-muted);
+    font-size: 13px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.slot-empty p {
+    margin: 0;
+}
+
+/* Link-Stil wie "Alle Bücher ansehen" auf der Übersicht */
+.slot-empty .section-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+}
