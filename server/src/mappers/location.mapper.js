@@ -9,7 +9,8 @@ export function toLocationTree(rows) {
         const roomName = row.room ?? 'Ohne Raum'
 
         if (!rooms.has(roomName)) {
-            rooms.set(roomName, { room: roomName, furniture: [] })
+            // key = Name in der Datenbank (null bei Möbeln ohne Raum), für Umbenennen/Löschen
+            rooms.set(roomName, { room: roomName, key: row.room, furniture: [] })
         }
 
         let furniture = furnitureById.get(row.furniture_id)
