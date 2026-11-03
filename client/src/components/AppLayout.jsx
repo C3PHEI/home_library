@@ -82,9 +82,9 @@ function Sidebar() {
             </nav>
 
             <p className="side-foot">
-                <strong>Ein gutes Buch</strong>
+                <strong>WEBSITE CREATED BY</strong>
                 <br />
-                findet immer wieder heim.
+                Maximilian Läpple
             </p>
         </aside>
     )
