@@ -3,13 +3,23 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-}
-
-.pagination-btn {
-    height: 44px;
-}
-
-.pagination-status {
-    font-size: 12.5px;
+    margin-top: 18px;
+    font-size: 12px;
     color: var(--text-muted);
+}
+
+.pagination-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Aktuelle Seite als dunkelgrüne Pille */
+.pagination-status {
+    padding: 8px 13px;
+    border-radius: 20px;
+    background: var(--accent);
+    font-size: 12px;
+    color: #FFF9ED;
+    white-space: nowrap;
 }

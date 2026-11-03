@@ -297,6 +297,24 @@ h3 {
   color: var(--text-faint);
 }
 
+/* Laden, Fehler und leere Zustände auf allen Seiten */
+.state-message {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.state-error {
+  padding: 12px 14px;
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
