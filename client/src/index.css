@@ -1,58 +1,94 @@
-/* Farben und Masse aus den Mockups */
+/* Farben und Masse aus dem neuen Mock ("Bibliothek Mama", Grün und Papier).
+   Die Variablennamen sind dieselben wie vorher, damit die bestehenden
+   Komponenten ohne Änderung die neuen Farben bekommen. */
 :root {
-  --bg: #F4F5F7;
-  --surface: #FFFFFF;
-  --border: #D5DAE1;
-  --input-border: #C4CAD3;
+  /* Flächen */
+  --bg: #F7F4EE;              /* Seitenhintergrund, warmes Papier */
+  --surface: #FBF9F3;         /* Karten, Eingabefelder */
+  --surface-muted: #F5F1E7;   /* leicht abgesetzte Flächen */
+  --cover-bg: #EEE9DC;        /* Platzhalter ohne Cover */
 
-  --text: #1B222B;
-  --text-muted: #55606E;
-  --text-faint: #8C97A5;
+  /* Linien */
+  --border: #E4DFD2;
+  --input-border: #C9C6B7;
+  --divider: #E6E0D4;
+  --row-divider: #EFEAE0;
 
-  --accent: #1F5FA8;
-  --accent-hover: #16437A;
-  --accent-soft: #E7EFF8;
+  /* Text */
+  --text: #293D35;
+  --text-muted: #777C6E;
+  --text-faint: #A6A18F;
 
-  --accent-border: #C0CEDD;
-  --accent-notice: #EDF2F8;
-  --accent-notice-text: #1B4B85;
-  --accent-notice-muted: #33506E;
+  /* Hauptfarbe (Buttons, Links, aktive Elemente) */
+  --accent: #315844;
+  --accent-hover: #24483B;
+  --accent-soft: #E6EDE6;
+  --accent-border: #B9C3AC;
 
-  --slot-filled: #DCE8F5;
-  --slot-filled-hover: #CBDDF0;
-  --slot-filled-border: #A8C4E3;
-  --slot-count: #33506E;
-  --slot-empty: #ECEFF3;
-  --slot-empty-hover: #E2E6EB;
-  --slot-empty-border: #B6BDC7;
+  /* Messing: Eyebrow-Texte, Icons, Akzentlinie in der Navigation */
+  --brass: #9A7652;
+  --brass-soft: #F0EADC;
+  --gold: #D2B173;
 
-  --divider: #E4E8ED;
-  --row-divider: #EEF1F4;
-  --surface-muted: #FAFBFC;
-  --cover-bg: #E3E7ED;
+  /* Seitenleiste */
+  --sidebar: #24483B;
+  --sidebar-hover: #365B4B;
+  --sidebar-text: #D6E0D6;
+  --sidebar-text-active: #FFF9ED;
+  --sidebar-muted: #A9B9AA;
+  --sidebar-border: #466354;
 
-  --warning: #8A5A12;
+  /* Zweitrangige Buttons */
+  --secondary: #E9E4D8;
+  --secondary-hover: #DED8CA;
+  --secondary-text: #315143;
 
-  --danger: #A12C2C;
-  --danger-soft: #FBECEC;
-  --danger-border: #E5B5B5;
+  /* Hinweis-Box (neutral) */
+  --accent-notice: #EEF1EA;
+  --accent-notice-text: #2F4F3F;
+  --accent-notice-muted: #4A5E52;
 
-  --success-soft: #EDF6EF;
-  --success-border: #A9CDB4;
+  /* Regalübersicht (bis zum Umbau der Übersicht) */
+  --slot-filled: #E7EEE4;
+  --slot-filled-hover: #DCE7D8;
+  --slot-filled-border: #B9C3AC;
+  --slot-count: #314A3B;
+  --slot-empty: #F8F5ED;
+  --slot-empty-hover: #F1ECE0;
+  --slot-empty-border: #D7CFBD;
+
+  /* Zustände */
+  --warning: #8A5E12;
+
+  --danger: #A54C40;
+  --danger-hover: #8E3F34;
+  --danger-soft: #F8ECE8;
+  --danger-border: #E2B9B0;
+
+  --success-soft: #EAF2EA;
+  --success-border: #A9C7AF;
   --success-icon: #2E6B42;
   --success-text: #24572F;
   --success-muted: #3D6A48;
 
-  --caution-soft: #FDF3E3;
+  --caution-soft: #FBF1DF;
   --caution-border: #E0B15E;
   --caution-icon: #8A5E12;
   --caution-text: #6B4A12;
   --caution-muted: #7A5716;
 
-  --radius: 6px;
-  --radius-sm: 4px;
+  /* Rundungen und Schatten */
+  --radius-lg: 16px;   /* Karten */
+  --radius: 12px;      /* Boxen, Hinweise */
+  --radius-sm: 10px;   /* Buttons, Eingabefelder */
 
-  --sans: 'IBM Plex Sans', system-ui, 'Segoe UI', sans-serif;
+  --shadow-sm: 0 3px 14px rgba(71, 62, 41, 0.06);
+  --shadow: 0 8px 28px rgba(71, 62, 41, 0.075);
+  --shadow-md: 0 14px 40px rgba(71, 62, 41, 0.1);
+
+  /* Schriften */
+  --sans: 'DM Sans', system-ui, 'Segoe UI', sans-serif;
+  --serif: 'Fraunces', Georgia, serif;
   --mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
 
   color-scheme: light;
@@ -61,6 +97,12 @@
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 body {
@@ -80,52 +122,157 @@ a:hover {
   outline-offset: 2px;
 }
 
+/* ---------- Typografie ---------- */
+
+/* Überschriften in der Serifenschrift wie im Mock.
+   Grösse und Abstände setzen die Seiten selbst. */
+h1,
+h2 {
+  font-family: var(--serif);
+  font-weight: 500;
+  color: var(--text);
+}
+
+h1 {
+  font-size: clamp(30px, 4vw, 43px);
+  line-height: 1.12;
+  letter-spacing: -1.2px;
+}
+
+h2 {
+  font-size: 25px;
+  line-height: 1.2;
+  letter-spacing: -0.4px;
+}
+
+h3 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Kleine Zeile über dem Seitentitel: "WILLKOMMEN DAHEIM" */
+.eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--brass);
+}
+
+.muted {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
 /* ---------- Gemeinsame Bausteine ---------- */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
 
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 38px;
+  gap: 9px;
+  height: 40px;
   padding: 0 16px;
   border-radius: var(--radius-sm);
   border: 1px solid transparent;
   font-family: inherit;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
+  transition: transform 0.16s, background 0.16s, border-color 0.16s;
+}
+.btn:hover {
+  transform: translateY(-1px);
 }
 
+/* Hauptaktion: dunkelgrün */
 .btn-primary {
   background: var(--accent);
-  color: #FFFFFF;
+  color: #FFFAF0;
 }
 .btn-primary:hover {
   background: var(--accent-hover);
-  color: #FFFFFF;
+  color: #FFFAF0;
 }
 
+/* Zweitrangig: beige Fläche */
 .btn-secondary {
-  background: var(--surface);
-  border-color: var(--input-border);
-  color: var(--text);
+  background: var(--secondary);
+  color: var(--secondary-text);
 }
 .btn-secondary:hover {
-  border-color: var(--text-muted);
-  color: var(--text);
+  background: var(--secondary-hover);
+  color: var(--secondary-text);
+}
+
+/* Nur Rahmen: Abbrechen, Zurück */
+.btn-outline {
+  background: transparent;
+  border-color: var(--input-border);
+  color: var(--secondary-text);
+}
+.btn-outline:hover {
+  background: var(--surface-muted);
+  color: var(--secondary-text);
+}
+
+/* Löschen */
+.btn-danger {
+  background: var(--danger);
+  color: #FFFAF0;
+}
+.btn-danger:hover {
+  background: var(--danger-hover);
+  color: #FFFAF0;
+}
+
+.btn-small {
+  height: 34px;
+  padding: 0 11px;
+  font-size: 12px;
 }
 
 .btn:disabled,
 .btn:disabled:hover {
   cursor: default;
-  background: var(--surface);
+  transform: none;
+  background: var(--surface-muted);
   border-color: var(--border);
   color: var(--text-faint);
 }
 
+/* Quadratischer Button nur mit Icon (Schliessen, Blättern) */
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid #DED9CC;
+  border-radius: var(--radius-sm);
+  background: #FAF8F1;
+  color: var(--secondary-text);
+  cursor: pointer;
+}
+.icon-btn:hover {
+  background: #EEE9DC;
+}
+.icon-btn:disabled {
+  cursor: default;
+  opacity: 0.45;
+  background: #FAF8F1;
+}
+
 .select {
-  height: 36px;
+  height: 40px;
   padding: 0 10px;
   border: 1px solid var(--input-border);
   border-radius: var(--radius-sm);
@@ -137,8 +284,7 @@ a:hover {
 
 .input {
   width: 100%;
-  height: 38px;
-  box-sizing: border-box;
+  height: 40px;
   padding: 0 12px;
   border: 1px solid var(--input-border);
   border-radius: var(--radius-sm);
