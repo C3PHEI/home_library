@@ -1,6 +1,7 @@
 ﻿import { ConflictError, NotFoundError, ValidationError } from '../errors/AppError.js'
 import { withTransaction } from '../db/transaction.js'
 import * as structureRepository from '../repositories/structure.repository.js'
+import { FURNITURE_ICONS } from '../validation/furnitureIcons.js'
 
 const NAME_MAX_LENGTH = 60
 
@@ -34,6 +35,15 @@ function parseMoveTo(query = {}) {
     return parseId(query.moveTo, 'moveTo')
 }
 
+// 'sofa' -> 'sofa', null oder '' -> null (zurück zum Standard-Icon)
+function parseIcon(value) {
+    if (value === null || value === '') return null
+    if (typeof value !== 'string' || !FURNITURE_ICONS.has(value)) {
+        throw new ValidationError({ icon: 'Unbekanntes Symbol' })
+    }
+    return value
+}
+
 // 23505 = unique_violation (Name schon vergeben)
 function isUniqueViolation(err) {
     return err.code === '23505'
@@ -58,13 +68,20 @@ export async function renameRoom(oldName, body = {}) {
     return { room: name }
 }
 
-// PATCH /api/furniture/:id   Body: { "name": "Regal B" }
-export async function renameFurniture(idParam, body = {}) {
+// PATCH /api/furniture/:id   Body: { "name": "Regal B", "icon": "sofa" }
+// Beide Felder sind optional, aber eines muss da sein. icon: null = Standard-Icon
+export async function updateFurniture(idParam, body = {}) {
     const id = parseId(idParam)
-    const name = cleanName(body.name, 'name')
+
+    const changes = {}
+    if (body.name !== undefined) changes.name = cleanName(body.name, 'name')
+    if (body.icon !== undefined) changes.icon = parseIcon(body.icon)
+    if (Object.keys(changes).length === 0) {
+        throw new ValidationError({ name: 'Name oder Symbol angeben' })
+    }
 
     try {
-        const row = await structureRepository.renameFurniture(id, name)
+        const row = await structureRepository.updateFurniture(id, changes)
         if (!row) throw new NotFoundError(`Möbelstück ${id} nicht gefunden`)
         return row
     } catch (err) {

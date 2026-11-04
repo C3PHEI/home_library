@@ -19,6 +19,7 @@ export function toLocationTree(rows) {
                 id: row.furniture_id,
                 name: row.furniture_name,
                 type: row.furniture_type,
+                icon: row.furniture_icon, // null = Standard-Icon nach Typ
                 bookCount: 0,
                 slots: []
             }

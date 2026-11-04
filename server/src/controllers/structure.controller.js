@@ -10,9 +10,9 @@ export async function deleteRoom(req, res) {
     res.json(await structureService.deleteRoom(req.params.name, req.query))
 }
 
-// PATCH /api/furniture/:id   Body: { "name": "..." }
-export async function renameFurniture(req, res) {
-    res.json(await structureService.renameFurniture(req.params.id, req.body))
+// PATCH /api/furniture/:id   Body: { "name": "...", "icon": "sofa" }
+export async function updateFurniture(req, res) {
+    res.json(await structureService.updateFurniture(req.params.id, req.body))
 }
 
 // DELETE /api/furniture/:id?moveTo=12

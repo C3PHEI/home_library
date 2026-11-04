@@ -27,10 +27,23 @@ export async function renameRoom(oldName, newName) {
     return rowCount
 }
 
-export async function renameFurniture(id, name) {
+// changes: { name?, icon? } - nur gesetzte Felder werden geändert
+export async function updateFurniture(id, changes) {
+    const sets = []
+    const params = [id]
+
+    if (changes.name !== undefined) {
+        params.push(changes.name)
+        sets.push(`name = $${params.length}`)
+    }
+    if (changes.icon !== undefined) {
+        params.push(changes.icon)
+        sets.push(`icon = $${params.length}`)
+    }
+
     const { rows } = await pool.query(
-        'UPDATE furniture SET name = $2 WHERE id = $1 RETURNING id, name',
-        [id, name]
+        `UPDATE furniture SET ${sets.join(', ')} WHERE id = $1 RETURNING id, name, icon`,
+        params
     )
     return rows[0] ?? null
 }

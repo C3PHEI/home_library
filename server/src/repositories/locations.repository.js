@@ -7,6 +7,7 @@ export async function findAllWithBookCounts(roomOrder) {
         `SELECT f.id    AS furniture_id,
                 f.name  AS furniture_name,
                 f.type  AS furniture_type,
+                f.icon  AS furniture_icon,
                 f.room,
                 s.id    AS slot_id,
                 s.label AS slot_label,
