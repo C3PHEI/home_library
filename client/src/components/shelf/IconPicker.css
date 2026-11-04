@@ -1,0 +1,85 @@
+﻿/* Icon-Auswahl im Dialog "Regal bearbeiten" (IconPicker.jsx) */
+
+.icon-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.icon-picker legend {
+    margin-bottom: 4px;
+    padding: 0;
+}
+
+.icon-group-title {
+    margin-bottom: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--brass);
+}
+
+.icon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+    gap: 6px;
+}
+
+.icon-option {
+    display: grid;
+    place-items: center;
+    height: 42px;
+    border: 1px solid #E8E2D6;
+    border-radius: var(--radius-sm);
+    background: #F9F7F0;
+    color: #54715B;
+    cursor: pointer;
+    transition: background 0.16s, border-color 0.16s, color 0.16s;
+}
+
+.icon-option:hover {
+    background: #F1EEE3;
+    border-color: var(--accent-border);
+}
+
+.icon-option:has(input:checked) {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #FFFAF0;
+}
+
+.icon-option:has(input:focus-visible) {
+    outline: 3px solid var(--brass);
+    outline-offset: 2px;
+}
+
+.icon-picker:disabled .icon-option {
+    cursor: default;
+    opacity: 0.6;
+}
+
+.icon-picker-selected {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.icon-picker-selected strong {
+    font-weight: 600;
+    color: var(--text);
+}
+
+/* iPad: grössere Felder zum Tippen */
+@media (pointer: coarse) {
+    .icon-grid {
+        grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+    }
+    .icon-option {
+        height: 48px;
+    }
+}
