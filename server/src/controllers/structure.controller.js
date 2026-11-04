@@ -1,8 +1,8 @@
 ﻿import * as structureService from '../services/structure.service.js'
 
-// PATCH /api/rooms/:name   Body: { "name": "..." }
-export async function renameRoom(req, res) {
-    res.json(await structureService.renameRoom(req.params.name, req.body))
+// PATCH /api/rooms/:name   Body: { "name": "...", "icon": "sofa" }
+export async function updateRoom(req, res) {
+    res.json(await structureService.updateRoom(req.params.name, req.body))
 }
 
 // DELETE /api/rooms/:name?moveTo=12

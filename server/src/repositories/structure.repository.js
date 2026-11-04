@@ -2,14 +2,27 @@
 
 // Räume, Möbel und Fächer umbenennen und löschen.
 // Ein Raum ist keine eigene Tabelle, sondern die Spalte furniture.room.
+// Das Raum-Icon steht in room_icon (eine Zeile pro Raum mit eigenem Icon).
 
 // ---------------------------------------------------------------------------
 // Umbenennen
 // ---------------------------------------------------------------------------
 
+// Raum-Funktionen laufen in einer Transaktion (client), weil Name und
+// Icon in zwei Tabellen stehen.
+
+// Sperrt die Möbel des Raums, gibt ihre Anzahl zurück (0 = Raum gibt es nicht)
+export async function lockRoom(client, room) {
+    const { rowCount } = await client.query(
+        'SELECT id FROM furniture WHERE room = $1 FOR UPDATE',
+        [room]
+    )
+    return rowCount
+}
+
 // Gibt es schon einen anderen Raum mit diesem Namen (Gross/klein egal)?
-export async function otherRoomExists(name, exceptRoom) {
-    const { rows } = await pool.query(
+export async function otherRoomExists(client, name, exceptRoom) {
+    const { rows } = await client.query(
         `SELECT 1 FROM furniture
           WHERE lower(room) = lower($1) AND room <> $2
           LIMIT 1`,
@@ -18,13 +31,34 @@ export async function otherRoomExists(name, exceptRoom) {
     return rows.length > 0
 }
 
-// Gibt die Anzahl umbenannter Möbel zurück (0 = Raum gibt es nicht)
-export async function renameRoom(oldName, newName) {
-    const { rowCount } = await pool.query(
-        'UPDATE furniture SET room = $2 WHERE room = $1',
-        [oldName, newName]
+// Name in furniture und room_icon ändern
+export async function renameRoom(client, oldName, newName) {
+    await client.query('UPDATE furniture SET room = $2 WHERE room = $1', [oldName, newName])
+    // Alte, verwaiste Zeile mit dem neuen Namen entfernen, sonst Konflikt beim Primärschlüssel
+    await client.query('DELETE FROM room_icon WHERE room = $1', [newName])
+    await client.query('UPDATE room_icon SET room = $2 WHERE room = $1', [oldName, newName])
+}
+
+// icon null = zurück zum Standard (Zeile löschen)
+export async function setRoomIcon(client, room, icon) {
+    if (icon === null) {
+        await client.query('DELETE FROM room_icon WHERE room = $1', [room])
+        return
+    }
+    await client.query(
+        `INSERT INTO room_icon (room, icon) VALUES ($1, $2)
+         ON CONFLICT (room) DO UPDATE SET icon = EXCLUDED.icon`,
+        [room, icon]
     )
-    return rowCount
+}
+
+export async function findRoomIcon(client, room) {
+    const { rows } = await client.query('SELECT icon FROM room_icon WHERE room = $1', [room])
+    return rows[0]?.icon ?? null
+}
+
+export async function deleteRoomIcon(client, room) {
+    await client.query('DELETE FROM room_icon WHERE room = $1', [room])
 }
 
 // changes: { name?, icon? } - nur gesetzte Felder werden geändert

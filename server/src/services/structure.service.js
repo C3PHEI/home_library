@@ -1,7 +1,7 @@
 ﻿import { ConflictError, NotFoundError, ValidationError } from '../errors/AppError.js'
 import { withTransaction } from '../db/transaction.js'
 import * as structureRepository from '../repositories/structure.repository.js'
-import { FURNITURE_ICONS } from '../validation/furnitureIcons.js'
+import { FURNITURE_ICONS, ROOM_ICONS } from '../validation/icons.js'
 
 const NAME_MAX_LENGTH = 60
 
@@ -36,9 +36,10 @@ function parseMoveTo(query = {}) {
 }
 
 // 'sofa' -> 'sofa', null oder '' -> null (zurück zum Standard-Icon)
-function parseIcon(value) {
+// allowed: FURNITURE_ICONS oder ROOM_ICONS
+function parseIcon(value, allowed) {
     if (value === null || value === '') return null
-    if (typeof value !== 'string' || !FURNITURE_ICONS.has(value)) {
+    if (typeof value !== 'string' || !allowed.has(value)) {
         throw new ValidationError({ icon: 'Unbekanntes Symbol' })
     }
     return value
@@ -53,19 +54,32 @@ function isUniqueViolation(err) {
 // Umbenennen
 // ---------------------------------------------------------------------------
 
-// PATCH /api/rooms/:name   Body: { "name": "Stube" }
-export async function renameRoom(oldName, body = {}) {
-    const name = cleanName(body.name, 'name')
-    if (name === oldName) return { room: name }
-
-    if (await structureRepository.otherRoomExists(name, oldName)) {
-        throw new ConflictError('Diesen Raum gibt es schon', { name: 'Diesen Raum gibt es schon' })
+// PATCH /api/rooms/:name   Body: { "name": "Stube", "icon": "sofa" }
+// Beide Felder sind optional, aber eines muss da sein. icon: null = Standard-Icon
+export async function updateRoom(oldName, body = {}) {
+    const name = body.name === undefined ? oldName : cleanName(body.name, 'name')
+    const icon = body.icon === undefined ? undefined : parseIcon(body.icon, ROOM_ICONS)
+    if (body.name === undefined && icon === undefined) {
+        throw new ValidationError({ name: 'Name oder Symbol angeben' })
     }
 
-    const changed = await structureRepository.renameRoom(oldName, name)
-    if (changed === 0) throw new NotFoundError(`Raum «${oldName}» nicht gefunden`)
+    return withTransaction(async (client) => {
+        const furnitureCount = await structureRepository.lockRoom(client, oldName)
+        if (furnitureCount === 0) throw new NotFoundError(`Raum «${oldName}» nicht gefunden`)
 
-    return { room: name }
+        if (name !== oldName) {
+            if (await structureRepository.otherRoomExists(client, name, oldName)) {
+                throw new ConflictError('Diesen Raum gibt es schon', { name: 'Diesen Raum gibt es schon' })
+            }
+            await structureRepository.renameRoom(client, oldName, name)
+        }
+
+        if (icon !== undefined) {
+            await structureRepository.setRoomIcon(client, name, icon)
+        }
+
+        return { room: name, icon: await structureRepository.findRoomIcon(client, name) }
+    })
 }
 
 // PATCH /api/furniture/:id   Body: { "name": "Regal B", "icon": "sofa" }
@@ -75,7 +89,7 @@ export async function updateFurniture(idParam, body = {}) {
 
     const changes = {}
     if (body.name !== undefined) changes.name = cleanName(body.name, 'name')
-    if (body.icon !== undefined) changes.icon = parseIcon(body.icon)
+    if (body.icon !== undefined) changes.icon = parseIcon(body.icon, FURNITURE_ICONS)
     if (Object.keys(changes).length === 0) {
         throw new ValidationError({ name: 'Name oder Symbol angeben' })
     }
@@ -124,7 +138,9 @@ export async function deleteRoom(room, query) {
         if (furnitureIds.length === 0) throw new NotFoundError(`Raum «${room}» nicht gefunden`)
 
         const slotIds = await structureRepository.lockSlotsOfFurniture(client, furnitureIds)
-        return removeAndMoveBooks(client, { furnitureIds, slotIds }, moveTo)
+        const result = await removeAndMoveBooks(client, { furnitureIds, slotIds }, moveTo)
+        await structureRepository.deleteRoomIcon(client, room)
+        return result
     })
 }
 

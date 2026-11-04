@@ -2,6 +2,7 @@
 
 // Eine Zeile pro Reihe (Slot), mit Möbel, Raum und Anzahl Bücher.
 // Möbel ohne Reihe erscheinen einmal mit slot_id = NULL.
+// room_icon: gewähltes Raum-Icon, NULL = Standard (aus dem Namen geraten)
 export async function findAllWithBookCounts(roomOrder) {
     const { rows } = await pool.query(
         `SELECT f.id    AS furniture_id,
@@ -9,10 +10,12 @@ export async function findAllWithBookCounts(roomOrder) {
                 f.type  AS furniture_type,
                 f.icon  AS furniture_icon,
                 f.room,
+                ri.icon AS room_icon,
                 s.id    AS slot_id,
                 s.label AS slot_label,
                 COALESCE(bc.cnt, 0)::int AS book_count
          FROM furniture f
+                  LEFT JOIN room_icon ri ON ri.room = f.room
                   LEFT JOIN shelf_slot s ON s.furniture_id = f.id
                   LEFT JOIN (
              SELECT shelf_slot_id, COUNT(*) AS cnt

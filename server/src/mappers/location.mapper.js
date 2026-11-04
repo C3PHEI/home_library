@@ -10,7 +10,8 @@ export function toLocationTree(rows) {
 
         if (!rooms.has(roomName)) {
             // key = Name in der Datenbank (null bei Möbeln ohne Raum), für Umbenennen/Löschen
-            rooms.set(roomName, { room: roomName, key: row.room, furniture: [] })
+            // icon = gewähltes Raum-Icon (null = Standard)
+            rooms.set(roomName, { room: roomName, key: row.room, icon: row.room_icon, furniture: [] })
         }
 
         let furniture = furnitureById.get(row.furniture_id)
