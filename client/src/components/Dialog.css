@@ -9,6 +9,7 @@
     background: var(--surface);
     color: var(--text);
     box-shadow: var(--shadow-md);
+    overflow-y: auto; /* lange Inhalte (Icon-Auswahl) auf kleinen Bildschirmen */
 }
 
 .dialog::backdrop {

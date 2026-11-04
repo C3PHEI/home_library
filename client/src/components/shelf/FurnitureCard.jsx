@@ -1,9 +1,10 @@
 ﻿import { Link } from 'react-router-dom'
-import { Archive, BookOpen, ChevronDown, ChevronRight, DoorOpen, Layers, Moon, Sofa } from 'lucide-react'
+import { ChevronDown, ChevronRight, Layers } from 'lucide-react'
 import { furnitureTypeLabel } from '../../utils/furniture.js'
 import { plural } from '../../utils/format.js'
 import { furnitureTarget, slotTarget } from '../../utils/structure.js'
 import EditActions from './EditActions.jsx'
+import FurnitureIcon from './FurnitureIcon.jsx'
 import './FurnitureCard.css'
 
 // Ein Möbel in der Übersicht.
@@ -110,7 +111,7 @@ function FurnitureHead({ furniture }) {
     return (
         <>
             <span className="furniture-mark" aria-hidden="true">
-                <TypeIcon type={furniture.type} />
+                <FurnitureIcon furniture={furniture} />
             </span>
             <span className="furniture-label">
                 <span className="furniture-type">{furnitureTypeLabel(furniture.type)}</span>
@@ -127,20 +128,4 @@ function CountPill({ count }) {
             {count === 0 ? 'Noch leer' : plural(count, 'Buch', 'Bücher')}
         </span>
     )
-}
-
-// Icon je Möbeltyp (siehe utils/furniture.js)
-function TypeIcon({ type }) {
-    switch (type) {
-        case 'cabinet':
-            return <DoorOpen size={18} />
-        case 'nightstand':
-            return <Moon size={18} />
-        case 'table':
-            return <Sofa size={18} />
-        case 'other':
-            return <Archive size={18} />
-        default:
-            return <BookOpen size={18} />
-    }
 }
