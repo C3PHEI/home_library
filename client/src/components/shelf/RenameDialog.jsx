@@ -2,14 +2,19 @@
 import { Pencil } from 'lucide-react'
 import Dialog from '../Dialog.jsx'
 import Field from '../form/Field.jsx'
+import IconPicker from './IconPicker.jsx'
 import { renameTarget } from '../../utils/structure.js'
+import { furnitureIconEntry } from '../../utils/furnitureIcons.js'
 
 const NAME_MAX_LENGTH = 60 // wie im Backend (structure.service.js)
 
-// Raum, Möbelstück oder Fach umbenennen.
+// Raum oder Fach umbenennen. Bei Möbeln zusätzlich das Icon wählen.
 // onDone(message) wird nach dem Speichern aufgerufen.
 export default function RenameDialog({ target, onClose, onDone }) {
+    const withIcon = target.level === 'furniture'
+
     const [name, setName] = useState(target.name)
+    const [icon, setIcon] = useState(target.icon ?? null)
     const [error, setError] = useState(null)
     const [busy, setBusy] = useState(false)
 
@@ -21,7 +26,10 @@ export default function RenameDialog({ target, onClose, onDone }) {
             setError('Bitte einen Namen eingeben')
             return
         }
-        if (newName === target.name) {
+
+        const nameChanged = newName !== target.name
+        const iconChanged = withIcon && icon !== target.icon
+        if (!nameChanged && !iconChanged) {
             onClose()
             return
         }
@@ -29,20 +37,21 @@ export default function RenameDialog({ target, onClose, onDone }) {
         setBusy(true)
         setError(null)
         try {
-            await renameTarget(target, newName)
-            onDone(`«${target.name}» heisst jetzt «${newName}».`)
+            await renameTarget(target, newName, icon)
+            onDone(doneMessage(target.name, newName, nameChanged, iconChanged))
         } catch (err) {
-            // Feldfehler kommen als fields.name (Raum, Möbel) oder fields.label (Fach)
-            setError(err.fields?.name ?? err.fields?.label ?? err.message)
+            // Feldfehler kommen als fields.name (Raum, Möbel), fields.label (Fach) oder fields.icon
+            setError(err.fields?.name ?? err.fields?.label ?? err.fields?.icon ?? err.message)
             setBusy(false)
         }
     }
 
     return (
         <Dialog
-            title={`${target.noun} umbenennen`}
+            title={withIcon ? `${target.noun} bearbeiten` : `${target.noun} umbenennen`}
             description={target.level === 'slot' ? `Fach in «${target.furnitureName}»` : undefined}
-            icon={Pencil}
+            // Bei Möbeln zeigt der Kreis oben gleich das gewählte Icon
+            icon={withIcon ? furnitureIconEntry(icon).Icon : Pencil}
             busy={busy}
             onClose={onClose}
             onSubmit={handleSubmit}
@@ -57,7 +66,7 @@ export default function RenameDialog({ target, onClose, onDone }) {
                 </>
             }
         >
-            <Field id="rename-name" label="Neuer Name" error={error}>
+            <Field id="rename-name" label={withIcon ? 'Name' : 'Neuer Name'} error={error}>
                 {(props) => (
                     <input
                         {...props}
@@ -75,6 +84,14 @@ export default function RenameDialog({ target, onClose, onDone }) {
                     />
                 )}
             </Field>
+
+            {withIcon && <IconPicker value={icon} onChange={setIcon} disabled={busy} />}
         </Dialog>
     )
+}
+
+function doneMessage(oldName, newName, nameChanged, iconChanged) {
+    if (nameChanged && iconChanged) return `«${oldName}» heisst jetzt «${newName}» und hat ein neues Symbol.`
+    if (nameChanged) return `«${oldName}» heisst jetzt «${newName}».`
+    return `«${oldName}» hat ein neues Symbol.`
 }
