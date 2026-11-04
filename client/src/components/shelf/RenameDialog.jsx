@@ -4,14 +4,21 @@ import Dialog from '../Dialog.jsx'
 import Field from '../form/Field.jsx'
 import IconPicker from './IconPicker.jsx'
 import { renameTarget } from '../../utils/structure.js'
-import { furnitureIconEntry } from '../../utils/furnitureIcons.js'
+import { FURNITURE_ICONS, ROOM_ICONS, furnitureIconEntry, roomIconEntry } from '../../utils/icons.js'
 
 const NAME_MAX_LENGTH = 60 // wie im Backend (structure.service.js)
 
-// Raum oder Fach umbenennen. Bei Möbeln zusätzlich das Icon wählen.
+// Welche Icons es bei welcher Ebene gibt. Fächer haben kein Icon.
+const ICONS_BY_LEVEL = {
+    room: { icons: ROOM_ICONS, entry: roomIconEntry },
+    furniture: { icons: FURNITURE_ICONS, entry: furnitureIconEntry },
+}
+
+// Fach umbenennen. Bei Raum und Möbel zusätzlich das Icon wählen:
+// beim Raum nur Raum-Icons, beim Möbel nur Möbel-Icons.
 // onDone(message) wird nach dem Speichern aufgerufen.
 export default function RenameDialog({ target, onClose, onDone }) {
-    const withIcon = target.level === 'furniture'
+    const iconSet = ICONS_BY_LEVEL[target.level] ?? null
 
     const [name, setName] = useState(target.name)
     const [icon, setIcon] = useState(target.icon ?? null)
@@ -28,7 +35,7 @@ export default function RenameDialog({ target, onClose, onDone }) {
         }
 
         const nameChanged = newName !== target.name
-        const iconChanged = withIcon && icon !== target.icon
+        const iconChanged = iconSet !== null && icon !== target.icon
         if (!nameChanged && !iconChanged) {
             onClose()
             return
@@ -48,10 +55,10 @@ export default function RenameDialog({ target, onClose, onDone }) {
 
     return (
         <Dialog
-            title={withIcon ? `${target.noun} bearbeiten` : `${target.noun} umbenennen`}
+            title={iconSet ? `${target.noun} bearbeiten` : `${target.noun} umbenennen`}
             description={target.level === 'slot' ? `Fach in «${target.furnitureName}»` : undefined}
-            // Bei Möbeln zeigt der Kreis oben gleich das gewählte Icon
-            icon={withIcon ? furnitureIconEntry(icon).Icon : Pencil}
+            // Bei Raum und Möbel zeigt der Kreis oben gleich das gewählte Icon
+            icon={iconSet ? iconSet.entry(icon).Icon : Pencil}
             busy={busy}
             onClose={onClose}
             onSubmit={handleSubmit}
@@ -66,7 +73,7 @@ export default function RenameDialog({ target, onClose, onDone }) {
                 </>
             }
         >
-            <Field id="rename-name" label={withIcon ? 'Name' : 'Neuer Name'} error={error}>
+            <Field id="rename-name" label={iconSet ? 'Name' : 'Neuer Name'} error={error}>
                 {(props) => (
                     <input
                         {...props}
@@ -85,7 +92,7 @@ export default function RenameDialog({ target, onClose, onDone }) {
                 )}
             </Field>
 
-            {withIcon && <IconPicker value={icon} onChange={setIcon} disabled={busy} />}
+            {iconSet && <IconPicker icons={iconSet.icons} value={icon} onChange={setIcon} disabled={busy} />}
         </Dialog>
     )
 }

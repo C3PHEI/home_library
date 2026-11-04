@@ -1,6 +1,6 @@
 ﻿import { apiGet, apiSend } from './client.js'
 
-// GET /api/locations -> { totals, rooms: [{ room, key, furniture: [{ id, name, type, icon, bookCount, slots }] }] }
+// GET /api/locations -> { totals, rooms: [{ room, key, icon, furniture: [{ id, name, type, icon, bookCount, slots }] }] }
 export function getLocations(options) {
     return apiGet('/locations', options)
 }
@@ -10,9 +10,9 @@ function moveToQuery(moveTo) {
     return moveTo ? `?moveTo=${moveTo}` : ''
 }
 
-// PATCH /api/rooms/:name -> { room }
-export function renameRoom(room, name) {
-    return apiSend('PATCH', `/rooms/${encodeURIComponent(room)}`, { name })
+// PATCH /api/rooms/:name -> { room, icon }
+export function updateRoom(room, changes) {
+    return apiSend('PATCH', `/rooms/${encodeURIComponent(room)}`, changes)
 }
 
 // DELETE /api/rooms/:name?moveTo=12 -> { deletedFurniture, deletedSlots, movedBooks, movedTo }

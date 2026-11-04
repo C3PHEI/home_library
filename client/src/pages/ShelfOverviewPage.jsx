@@ -1,17 +1,6 @@
 ﻿import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import {
-    ArrowUpRight,
-    BookOpen,
-    BriefcaseBusiness,
-    Check,
-    House,
-    Library,
-    MapPin,
-    Moon,
-    Pencil,
-    Sofa,
-} from 'lucide-react'
+import { ArrowUpRight, BookOpen, Check, Library, MapPin, Pencil } from 'lucide-react'
 import { getLocations } from '../api/locations.js'
 import { useApi } from '../hooks/useApi.js'
 import { useStoredState } from '../hooks/useStoredState.js'
@@ -21,6 +10,7 @@ import PageHead from '../components/PageHead.jsx'
 import Notice from '../components/Notice.jsx'
 import FurnitureCard from '../components/shelf/FurnitureCard.jsx'
 import EditActions from '../components/shelf/EditActions.jsx'
+import RoomIcon from '../components/shelf/RoomIcon.jsx'
 import RenameDialog from '../components/shelf/RenameDialog.jsx'
 import DeleteDialog from '../components/shelf/DeleteDialog.jsx'
 import './ShelfOverviewPage.css'
@@ -193,7 +183,7 @@ function Room({ room, openId, onToggle, editing, onEdit }) {
     return (
         <section className="room-section" aria-labelledby={headingId}>
             <div className="room-heading">
-                <RoomIcon name={room.room} />
+                <RoomIcon room={room} />
                 <h2 id={headingId}>{room.room}</h2>
                 <span className="room-count">
                     {plural(room.furniture.length, 'Möbelstück', 'Möbelstücke')} · {plural(slotCount, 'Fach', 'Fächer')}
@@ -223,16 +213,4 @@ function Room({ room, openId, onToggle, editing, onEdit }) {
             </div>
         </section>
     )
-}
-
-// Icon neben dem Raumnamen
-function RoomIcon({ name }) {
-    const lower = name.toLowerCase()
-    const props = { size: 19, 'aria-hidden': true }
-    if (lower.includes('wohn')) return <Sofa {...props} />
-    if (lower.includes('schlaf')) return <Moon {...props} />
-    if (lower.includes('büro') || lower.includes('buero') || lower.includes('arbeit')) {
-        return <BriefcaseBusiness {...props} />
-    }
-    return <House {...props} />
 }

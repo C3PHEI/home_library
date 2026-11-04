@@ -1,7 +1,7 @@
-﻿import { deleteFurniture, deleteRoom, renameRoom, updateFurniture } from '../api/locations.js'
+﻿import { deleteFurniture, deleteRoom, updateFurniture, updateRoom } from '../api/locations.js'
 import { deleteSlot, renameSlot } from '../api/slots.js'
 import { furnitureTypeLabel } from './furniture.js'
-import { furnitureIconKey } from './furnitureIcons.js'
+import { furnitureIconKey, roomIconKey } from './icons.js'
 
 // Ein "Ziel" ist das, was umbenannt oder gelöscht wird: ein Raum,
 // ein Möbelstück oder ein Fach. Die Dialoge kennen nur diese Form:
@@ -19,6 +19,7 @@ export function roomTarget(room) {
         id: room.key, // Name in der Datenbank
         name: room.room,
         noun: 'Raum',
+        icon: roomIconKey(room), // Icon, das gerade angezeigt wird
         furnitureCount: room.furniture.length,
         slotIds: slots.map((slot) => slot.id),
         bookCount: sumBooks(slots),
@@ -31,7 +32,7 @@ export function furnitureTarget(furniture) {
         id: furniture.id,
         name: furniture.name,
         noun: furnitureTypeLabel(furniture.type), // "Regal", "Schrank" ...
-        icon: furnitureIconKey(furniture),
+        icon: furnitureIconKey(furniture), // Icon, das gerade angezeigt wird
         slotIds: furniture.slots.map((slot) => slot.id),
         bookCount: furniture.bookCount,
     }
@@ -49,11 +50,11 @@ export function slotTarget(slot, furniture) {
     }
 }
 
-// icon nur bei Möbeln (bei Raum und Fach ignoriert)
+// icon nur bei Raum und Möbel (beim Fach ignoriert)
 export function renameTarget(target, name, icon) {
     switch (target.level) {
         case 'room':
-            return renameRoom(target.id, name)
+            return updateRoom(target.id, { name, icon })
         case 'furniture':
             return updateFurniture(target.id, { name, icon })
         default:
