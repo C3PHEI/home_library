@@ -47,6 +47,15 @@
     margin: 4px 0 0;
 }
 
+/* Rechts: "Bearbeiten" und "Alle Bücher ansehen" */
+.section-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px 16px;
+}
+
 .section-link {
     display: inline-flex;
     align-items: center;
@@ -54,6 +63,13 @@
     font-size: 12px;
     font-weight: 600;
     color: var(--accent);
+}
+
+/* Hinweis im Bearbeiten-Modus und Rückmeldung nach dem Speichern */
+.overview-notices {
+    display: grid;
+    gap: 8px;
+    margin: -8px 0 22px;
 }
 
 /* ---------- Räume ---------- */
@@ -78,6 +94,11 @@
 .room-count {
     font-size: 12px;
     color: #838575;
+}
+
+/* Stift und Papierkorb am rechten Rand der Raumzeile */
+.room-actions {
+    margin-left: auto;
 }
 
 .furniture-list {

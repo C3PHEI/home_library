@@ -1,25 +1,34 @@
-﻿import { Link } from 'react-router-dom'
+﻿import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
     ArrowUpRight,
     BookOpen,
     BriefcaseBusiness,
+    Check,
     House,
     Library,
     MapPin,
     Moon,
+    Pencil,
     Sofa,
 } from 'lucide-react'
 import { getLocations } from '../api/locations.js'
 import { useApi } from '../hooks/useApi.js'
 import { useStoredState } from '../hooks/useStoredState.js'
 import { formatCount, plural } from '../utils/format.js'
+import { roomTarget } from '../utils/structure.js'
 import PageHead from '../components/PageHead.jsx'
+import Notice from '../components/Notice.jsx'
 import FurnitureCard from '../components/shelf/FurnitureCard.jsx'
+import EditActions from '../components/shelf/EditActions.jsx'
+import RenameDialog from '../components/shelf/RenameDialog.jsx'
+import DeleteDialog from '../components/shelf/DeleteDialog.jsx'
 import './ShelfOverviewPage.css'
 
 // Startseite: Zahlen oben, darunter alle Räume mit ihren Möbeln.
 // Ein Möbel mit mehreren Fächern klappt auf, eines mit nur einem Fach
 // führt direkt zur Fachseite (/regal/:slotId).
+// Mit "Bearbeiten" lassen sich Räume, Möbel und Fächer umbenennen und löschen.
 export default function ShelfOverviewPage() {
     const { data, error, loading, reload } = useApi(getLocations)
 
@@ -27,8 +36,30 @@ export default function ShelfOverviewPage() {
     // "Zurück" von der Fachseite noch offen ist. Immer nur eines offen.
     const [openId, setOpenId] = useStoredState('bibliothek.uebersicht.offen', null)
 
+    const [editing, setEditing] = useState(false)
+    // Offener Dialog: { kind: 'rename' | 'delete', target } (target aus utils/structure.js)
+    const [dialog, setDialog] = useState(null)
+    // Rückmeldung nach Umbenennen oder Löschen
+    const [doneMessage, setDoneMessage] = useState(null)
+
     function handleToggle(furnitureId) {
         setOpenId(openId === furnitureId ? null : furnitureId)
+    }
+
+    function handleEditToggle() {
+        setEditing(!editing)
+        setDoneMessage(null)
+    }
+
+    function handleEdit(kind, target) {
+        setDoneMessage(null)
+        setDialog({ kind, target })
+    }
+
+    function handleDone(message) {
+        setDialog(null)
+        setDoneMessage(message)
+        reload()
     }
 
     return (
@@ -65,20 +96,67 @@ export default function ShelfOverviewPage() {
                             <div className="eyebrow">Ein Blick durchs Haus</div>
                             <h2>Wo stehen unsere Bücher?</h2>
                         </div>
-                        <Link to="/buecher" className="section-link">
-                            Alle Bücher ansehen
-                            <ArrowUpRight size={15} aria-hidden="true" />
-                        </Link>
+                        <div className="section-tools">
+                            {data.rooms.length > 0 && (
+                                <button
+                                    type="button"
+                                    className={editing ? 'btn btn-primary btn-small' : 'btn btn-outline btn-small'}
+                                    onClick={handleEditToggle}
+                                >
+                                    {editing ? (
+                                        <Check size={15} aria-hidden="true" />
+                                    ) : (
+                                        <Pencil size={15} aria-hidden="true" />
+                                    )}
+                                    {editing ? 'Fertig' : 'Bearbeiten'}
+                                </button>
+                            )}
+                            <Link to="/buecher" className="section-link">
+                                Alle Bücher ansehen
+                                <ArrowUpRight size={15} aria-hidden="true" />
+                            </Link>
+                        </div>
                     </div>
+
+                    {(editing || doneMessage) && (
+                        <div className="overview-notices">
+                            {editing && (
+                                <Notice variant="info" title="Namen ändern oder löschen">
+                                    Stift: Namen ändern. Papierkorb: Raum, Möbelstück oder Fach löschen.
+                                    Bücher bleiben dabei immer erhalten.
+                                </Notice>
+                            )}
+                            {doneMessage && <Notice variant="success" title={doneMessage} />}
+                        </div>
+                    )}
 
                     {data.rooms.length === 0 && (
                         <p className="room-empty">Noch keine Möbel erfasst.</p>
                     )}
 
                     {data.rooms.map((room) => (
-                        <Room key={room.room} room={room} openId={openId} onToggle={handleToggle} />
+                        <Room
+                            key={room.room}
+                            room={room}
+                            openId={openId}
+                            onToggle={handleToggle}
+                            editing={editing}
+                            onEdit={handleEdit}
+                        />
                     ))}
                 </>
+            )}
+
+            {dialog?.kind === 'rename' && (
+                <RenameDialog target={dialog.target} onClose={() => setDialog(null)} onDone={handleDone} />
+            )}
+            {dialog?.kind === 'delete' && data && (
+                <DeleteDialog
+                    target={dialog.target}
+                    rooms={data.rooms}
+                    onClose={() => setDialog(null)}
+                    onDone={handleDone}
+                />
             )}
         </div>
     )
@@ -106,9 +184,11 @@ function Stats({ totals }) {
     )
 }
 
-function Room({ room, openId, onToggle }) {
+function Room({ room, openId, onToggle, editing, onEdit }) {
     const slotCount = room.furniture.reduce((sum, furniture) => sum + furniture.slots.length, 0)
     const headingId = `room-${room.room.toLowerCase().replace(/\s+/g, '-')}`
+    // Möbel ohne Raum (key null) erscheinen unter "Ohne Raum": nichts zum Umbenennen
+    const canEditRoom = editing && room.key !== null
 
     return (
         <section className="room-section" aria-labelledby={headingId}>
@@ -118,6 +198,15 @@ function Room({ room, openId, onToggle }) {
                 <span className="room-count">
                     {plural(room.furniture.length, 'Möbelstück', 'Möbelstücke')} · {plural(slotCount, 'Fach', 'Fächer')}
                 </span>
+                {canEditRoom && (
+                    <span className="room-actions">
+                        <EditActions
+                            name={`Raum ${room.room}`}
+                            onRename={() => onEdit('rename', roomTarget(room))}
+                            onDelete={() => onEdit('delete', roomTarget(room))}
+                        />
+                    </span>
+                )}
             </div>
 
             <div className="furniture-list">
@@ -127,6 +216,8 @@ function Room({ room, openId, onToggle }) {
                         furniture={furniture}
                         open={openId === furniture.id}
                         onToggle={() => onToggle(furniture.id)}
+                        editing={editing}
+                        onEdit={onEdit}
                     />
                 ))}
             </div>
