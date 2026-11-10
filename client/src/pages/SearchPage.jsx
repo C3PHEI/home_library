@@ -1,8 +1,10 @@
 ﻿import { useCallback } from 'react'
-import { useLocation, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
+import { Plus, Search, SearchCheck } from 'lucide-react'
 import { searchBooks } from '../api/search.js'
 import { useApi } from '../hooks/useApi.js'
 import { formatCount, plural } from '../utils/format.js'
+import PageHead from '../components/PageHead.jsx'
 import SearchForm from '../components/search/SearchForm.jsx'
 import SearchHit from '../components/search/SearchHit.jsx'
 import SearchNote from '../components/search/SearchNote.jsx'
@@ -46,31 +48,28 @@ export default function SearchPage() {
 
     function handleSearch(nextQuery) {
         if (nextQuery === q) return
-        // Neue Suche beginnt immer bei "Alle". Neuer Eintrag im Verlauf,
-        // damit "Zurück" zur vorherigen Suche führt.
-        setSearchParams(nextQuery ? { q: nextQuery } : {})
+        // Neue Suche beginnt immer bei "Alle". Gesucht wird schon beim Tippen,
+        // darum den Verlaufseintrag ersetzen: "Zurück" verlässt die Suche,
+        // statt durch jeden getippten Buchstaben zu springen.
+        setSearchParams(nextQuery ? { q: nextQuery } : {}, { replace: true })
     }
 
     function handleTabChange(tab) {
-        // Tabwechsel ersetzt den Verlaufseintrag: "Zurück" springt zur vorherigen Suche,
-        // nicht durch jeden angeklickten Tab
         setSearchParams(tab === 'all' ? { q } : { q, tab }, { replace: true })
     }
 
     return (
         <div className="page search-page">
-            <div className="search-head">
-                <h1 className="page-title">Buch suchen</h1>
+            <PageHead
+                eyebrow="Schnell nachschlagen"
+                title="Wo ist dieses Buch?"
+                lead="Titel, Autor oder ISBN eingeben – wir suchen in deinem Zuhause."
+            />
 
-                <SearchForm key={q} initialQuery={q} onSearch={handleSearch} />
-
-                <p className="search-hint">
-                    Sucht in Titel, Autor, ISBN, Verlag, Erscheinungsjahr, Sprache und Standort.
-                    Tippfehler bei Titel und Autor sind verziehen.
-                </p>
+            <div className="search-controls">
+                <SearchForm query={q} onSearch={handleSearch} />
+                {showTabs && <SearchTabs tabs={tabs} activeTab={activeTab} onChange={handleTabChange} />}
             </div>
-
-            {showTabs && <SearchTabs tabs={tabs} activeTab={activeTab} onChange={handleTabChange} />}
 
             <SearchStatus q={q} data={data} results={results} visibleCount={items.length} activeTab={activeTab} />
 
@@ -83,7 +82,6 @@ export default function SearchPage() {
                     ))}
                 </ul>
             )}
-
         </div>
     )
 }
@@ -92,7 +90,16 @@ export default function SearchPage() {
 function SearchStatus({ q, data, results, visibleCount, activeTab }) {
     // 1. Noch kein Suchbegriff
     if (!q) {
-        return <p className="state-message">Titel, Autor oder ISBN eingeben und auf „Suchen“ klicken.</p>
+        return (
+            <div className="search-start">
+                <Search size={23} aria-hidden="true" />
+                <p className="search-start-title">Einfach oben lostippen.</p>
+                <p>
+                    Gesucht wird in Titel, Autor, ISBN, Verlag, Erscheinungsjahr, Sprache und Standort.
+                    Tippfehler bei Titel und Autor sind verziehen.
+                </p>
+            </div>
+        )
     }
 
     // 2. Fehler
@@ -128,11 +135,17 @@ function SearchStatus({ q, data, results, visibleCount, activeTab }) {
     // 4. Nichts gefunden
     if (data.total === 0) {
         return (
-            <div className="search-empty" role="status">
-                <p className="search-empty-title">Nichts gefunden für „{q}“.</p>
-                <p className="search-empty-tip">
-                    Tipp: Weniger Wörter versuchen, nur den Nachnamen des Autors oder die ISBN ohne Bindestriche.
+            <div className="card search-empty" role="status">
+                <SearchCheck size={28} aria-hidden="true" />
+                <h2 className="search-empty-title">Hier steht dieses Buch noch nicht</h2>
+                <p className="search-empty-text">
+                    Für „{q}“ gibt es keinen Treffer. Prüfe die Schreibweise, versuche nur den Nachnamen
+                    des Autors oder die ISBN ohne Bindestriche. Oder füge das Buch gleich hinzu.
                 </p>
+                <Link to="/erfassen" className="btn btn-primary">
+                    <Plus size={16} aria-hidden="true" />
+                    Buch hinzufügen
+                </Link>
             </div>
         )
     }
@@ -144,12 +157,14 @@ function SearchStatus({ q, data, results, visibleCount, activeTab }) {
     return (
         <>
             <div className="search-summary" role="status">
-                <span>
+                <h2>
                     {activeTab === 'all'
-                        ? plural(data.total, 'Treffer', 'Treffer')
+                        ? `${plural(data.total, 'Treffer', 'Treffer')} gefunden`
                         : `${formatCount(visibleCount)} von ${plural(data.total, 'Treffer', 'Treffern')} in ${tabLabel(activeTab)}`}
+                </h2>
+                <span className="search-summary-sort">
+                    {fuzzy ? 'Sortiert nach Ähnlichkeit' : 'Sortiert nach Titel'}
                 </span>
-                <span>{fuzzy ? 'Sortiert nach Ähnlichkeit' : 'Sortiert nach Titel'}</span>
             </div>
 
             {fuzzy && (

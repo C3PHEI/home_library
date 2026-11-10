@@ -1,34 +1,33 @@
-﻿/* .page-title kommt aus components/PageHead.css */
+﻿/* Suche (SearchPage.jsx). Seitenkopf: components/PageHead.css */
 
-/* Formular höchstens 760 px breit */
-.search-head {
-    max-width: 760px;
-    margin-bottom: 14px;
+/* Suchfeld, darunter die Filter */
+.search-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-.search-head .page-title {
-    margin-bottom: 12px;
-}
-
-.search-hint {
-    margin: 10px 0 0;
-    font-size: 12.5px;
-    color: var(--text-muted);
-}
-
+/* "8 Treffer gefunden" links, Sortierung rechts */
 .search-summary {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 12px;
-    font-size: 13px;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    margin: 28px 0 17px;
+}
+
+.search-summary h2 {
+    margin: 0;
+}
+
+.search-summary-sort {
+    font-size: 12px;
     color: var(--text-muted);
 }
 
 .search-results {
-    display: flex;
-    flex-direction: column;
+    display: grid;
     gap: 10px;
     margin: 0;
     padding: 0;
@@ -36,40 +35,69 @@
     transition: opacity 120ms;
 }
 
-/* "Nochmals versuchen" läuft: alte Treffer gedimmt stehen lassen */
+/* Neue Suche läuft: alte Treffer gedimmt stehen lassen */
 .search-results.is-loading {
     opacity: 0.55;
 }
 
+/* Noch nichts eingegeben */
+.search-start {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 28px;
+    padding: 28px 23px;
+    border: 1px dashed var(--slot-empty-border);
+    border-radius: 14px;
+    background: var(--surface-muted);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.search-start p {
+    max-width: 520px;
+    margin: 0;
+}
+
+.search-start .search-start-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+}
+
 /* Nichts gefunden */
 .search-empty {
-    max-width: 760px;
-    padding: 18px 20px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 28px;
+    padding: 50px 25px;
+    text-align: center;
 }
 
 .search-empty-title {
-    margin: 0;
-    font-size: 15px;
-    font-weight: 600;
+    margin: 12px 0 7px;
+    font-size: 22px;
     overflow-wrap: anywhere;
 }
 
-.search-empty-tip {
-    margin: 6px 0 0;
-    font-size: 13px;
+.search-empty-text {
+    max-width: 520px;
+    margin: 0 0 18px;
+    font-size: 14px;
+    line-height: 1.5;
     color: var(--text-muted);
+    overflow-wrap: anywhere;
 }
 
-/* .state-message hat 24 px Abstand oben, hier sitzt es direkt unter dem Hinweis */
+/* Hinweis auf die Tippfehler-Suche sitzt direkt über den Treffern */
+.search-page .search-note {
+    margin-bottom: 14px;
+}
+
 .search-page .state-message {
-    margin-top: 8px;
-}
-
-/* Fehlerbox so breit wie das Suchfeld */
-.search-page .state-error {
-    max-width: 760px;
-    box-sizing: border-box;
+    margin-top: 28px;
 }
