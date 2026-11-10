@@ -19,10 +19,18 @@
     border-radius: 2px;
 }
 
+/* Suchtreffer: kleines "Buch" wie im neuen Mock (.cover) */
 .book-cover-hit {
-    width: 54px;
-    height: 76px;
+    width: 53px;
+    height: 70px;
     flex-shrink: 0;
+    border: 0;
+    border-radius: 5px 8px 8px 5px;
+    box-shadow: 2px 3px 6px rgba(72, 61, 40, 0.11);
+}
+
+.book-cover-hit.book-cover-missing {
+    box-shadow: none;
 }
 
 /* Vorschau beim Erfassen: ganzes Bild zeigen, nicht beschneiden */
@@ -38,10 +46,6 @@
     height: 36px;
 }
 
-.book-cover-hit.book-cover-missing svg {
-    width: 20px;
-    height: 20px;
-}
 
 .book-cover-missing {
     display: flex;
