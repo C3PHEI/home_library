@@ -1,24 +1,62 @@
-﻿/* Mockup: Feld und Button 48 px hoch, Feld mit blauem Rahmen */
-.search-page-form {
+﻿/* Suchfeld aus dem neuen Mock (.search-box): Lupe, Eingabe, "x" zum Leeren */
+.search-box {
     display: flex;
+    align-items: center;
     gap: 10px;
+    max-width: 780px;
+    height: 48px;
+    padding: 0 8px 0 14px;
+    border: 1px solid #D9D5C8;
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: #888A7C;
 }
 
-.search-page-input {
-    flex-grow: 1;
-    height: 48px;
-    padding: 0 14px;
-    border-color: var(--accent);
-    font-size: 15px;
+.search-box:focus-within {
+    border-color: #849A79;
+    box-shadow: 0 0 0 3px rgba(80, 111, 79, 0.094);
 }
 
-.search-page-button {
-    height: 48px;
-    padding: 0 24px;
+.search-box > svg {
+    flex-shrink: 0;
+}
+
+.search-box-input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: none;
+    font-family: inherit;
     font-size: 14px;
+    color: var(--text);
 }
 
-@media (max-width: 760px) {
-    .search-page-input { font-size: 16px; } /* verhindert Zoom beim Antippen auf dem iPhone */
-    .search-page-button { padding: 0 16px; }
+.search-box-input::placeholder {
+    color: var(--text-faint);
+}
+
+.search-box-clear {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.search-box-clear:hover {
+    background: var(--secondary);
+    color: var(--text);
+}
+
+@media (max-width: 700px) {
+    .search-box-input { font-size: 16px; } /* verhindert Zoom beim Antippen auf dem iPhone */
 }
