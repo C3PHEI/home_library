@@ -1,93 +1,105 @@
-﻿/* Masse und Farben aus Suche.html */
+﻿/* Trefferkarte aus dem neuen Mock (.book-row, .book-main, .location-link) */
 .search-hit {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 14px 16px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--text);
-    transition: border-color 120ms;
-}
-.search-hit:hover {
-    color: var(--text);
-    border-color: var(--accent);
-}
-.search-hit:hover .search-hit-title {
-    color: var(--accent);
+    gap: 15px;
+    padding: 13px;
+    transition: border-color 0.16s, box-shadow 0.16s;
 }
 
-.search-hit-text {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    flex-grow: 1;
+.search-hit:hover {
+    border-color: var(--accent-border);
+    box-shadow: var(--shadow);
+}
+
+.search-hit-main {
+    flex: 1;
     min-width: 0;
 }
 
 .search-hit-title {
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: -0.005em;
+    display: block;
+    font-family: var(--serif);
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--text);
     overflow-wrap: anywhere;
 }
 
+/* Der Titel-Link deckt die ganze Karte ab */
+.search-hit-title::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-lg);
+}
+
+.search-hit-title:focus-visible {
+    outline: none;
+}
+
+.search-hit-title:focus-visible::after {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
 .search-hit-author {
+    margin-top: 5px;
     font-size: 13px;
-    color: var(--slot-count);
+    color: #72776B;
 }
 
-.search-hit-isbn {
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--text-muted);
-}
-
-/* Standort-Box rechts: das Wichtigste am Treffer */
-.search-hit-location {
+.search-hit-meta {
     display: flex;
+    flex-wrap: wrap;
+    gap: 3px 9px;
+    margin-top: 7px;
+    font-size: 11px;
+    color: #888B7E;
+}
+
+/* Standort: liegt über dem Karten-Link und ist selbst anklickbar */
+.search-hit-location {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
     align-items: center;
-    gap: 9px;
-    flex-shrink: 0;
-    padding: 10px 14px;
-    border: 1px solid var(--slot-filled-border);
-    border-radius: var(--radius-sm);
-    background: var(--accent-soft);
+    gap: 5px;
+    margin-top: 7px;
+    padding: 2px 0;
+    font-size: 12px;
+    font-weight: 600;
     color: var(--accent);
 }
 
-.search-hit-location-text {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
+.search-hit-location:hover {
+    text-decoration: underline;
 }
 
-.search-hit-place {
-    font-size: 13.5px;
-    font-weight: 600;
-    color: var(--accent-hover);
+.search-hit-location svg {
+    flex-shrink: 0;
 }
 
 .search-hit-room {
-    font-size: 11.5px;
-    color: var(--slot-count);
+    font-weight: 500;
+    color: var(--text-muted);
 }
 
-/* Handy: Cover und Text nebeneinander, Standort darunter über die ganze Breite */
-@media (max-width: 760px) {
+/* Pfeil rechts: nur Zierde, geklickt wird die Karte */
+.search-hit-open {
+    flex-shrink: 0;
+}
+
+.search-hit:hover .search-hit-open {
+    background: #EEE9DC;
+}
+
+@media (max-width: 700px) {
     .search-hit {
-        flex-wrap: wrap;
-        gap: 12px 14px;
-        padding: 12px;
+        gap: 11px;
+        padding: 11px;
     }
-
-    .search-hit-text {
-        flex-basis: 0;
-    }
-
-    .search-hit-location {
-        flex-basis: 100%;
-        box-sizing: border-box;
-    }
+    .search-hit-title { font-size: 16px; }
 }

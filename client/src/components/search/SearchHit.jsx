@@ -1,40 +1,40 @@
 ﻿import { Link } from 'react-router-dom'
+import { ChevronRight, MapPin } from 'lucide-react'
 import BookCover from '../books/BookCover.jsx'
 import { placeLabel } from '../../utils/location.js'
 import './SearchHit.css'
 
-// Ein Suchtreffer: Cover, Titel, Autor, ISBN und rechts der Standort.
-// Die ganze Karte führt zur Buchdetailseite. from = Adresse für den Rückweg.
+// Ein Suchtreffer als Karte: Cover, Titel, Autor, Jahr, ISBN und der Standort.
+// Die ganze Karte führt zur Buchdetailseite (der Titel-Link ist über die Karte
+// gespannt), der Standort führt zum Fach. from = Adresse für den Rückweg.
 export default function SearchHit({ book, from }) {
     const { location } = book
 
     return (
-        <Link to={`/buecher/${book.id}`} state={{ from }} className="search-hit">
+        <article className="card search-hit">
             <BookCover src={book.coverThumbUrl} variant="hit" />
 
-            <span className="search-hit-text">
-                <span className="search-hit-title">{book.title}</span>
-                <span className="search-hit-author">{book.author}</span>
-                <span className="search-hit-isbn">{book.isbn13 ?? 'keine ISBN erfasst'}</span>
-            </span>
+            <div className="search-hit-main">
+                <Link to={`/buecher/${book.id}`} state={{ from }} className="search-hit-title">
+                    {book.title}
+                </Link>
+                <div className="search-hit-author">{book.author}</div>
+                <div className="search-hit-meta">
+                    {book.publishedYear && <span>{book.publishedYear}</span>}
+                    <span>{book.isbn13 ? `ISBN ${book.isbn13}` : 'keine ISBN erfasst'}</span>
+                </div>
+                <Link to={`/regal/${location.slotId}`} className="search-hit-location">
+                    <MapPin size={13} aria-hidden="true" />
+                    <span>
+                        {placeLabel(location)}
+                        {location.room && <span className="search-hit-room"> · {location.room}</span>}
+                    </span>
+                </Link>
+            </div>
 
-            <span className="search-hit-location">
-                <PinIcon />
-                <span className="search-hit-location-text">
-                    <span className="search-hit-place">{placeLabel(location)}</span>
-                    {location.room && <span className="search-hit-room">{location.room}</span>}
-                </span>
+            <span className="icon-btn search-hit-open" aria-hidden="true">
+                <ChevronRight size={18} />
             </span>
-        </Link>
-    )
-}
-
-function PinIcon() {
-    return (
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M12 21s-7-5.5-7-11a7 7 0 1 1 14 0c0 5.5-7 11-7 11z" />
-            <circle cx="12" cy="10" r="2.5" />
-        </svg>
+        </article>
     )
 }
