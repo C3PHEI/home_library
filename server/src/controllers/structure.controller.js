@@ -1,5 +1,16 @@
 ﻿import * as structureService from '../services/structure.service.js'
 
+// POST /api/furniture   Body: { "room": "Flur", "type": "cabinet", "name": "Schrank im Flur", "slotCount": 4 }
+// statt slotCount auch "slotLabels": ["Oben", "Mitte", "Unten"]
+export async function createFurniture(req, res) {
+    res.status(201).json(await structureService.createFurniture(req.body))
+}
+
+// POST /api/furniture/:id/slots   Body: { "label": "Ganz unten" }
+export async function createSlot(req, res) {
+    res.status(201).json(await structureService.createSlot(req.params.id, req.body))
+}
+
 // PATCH /api/rooms/:name   Body: { "name": "...", "icon": "sofa" }
 export async function updateRoom(req, res) {
     res.json(await structureService.updateRoom(req.params.name, req.body))
