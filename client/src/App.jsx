@@ -4,8 +4,7 @@ import ShelfOverviewPage from './pages/ShelfOverviewPage.jsx'
 import SlotPage from './pages/SlotPage.jsx'
 import PlaceholderPage from './pages/PlaceholderPage.jsx'
 import SearchPage from './pages/SearchPage.jsx'
-import AddBookIsbnPage from './pages/AddBookIsbnPage.jsx'
-import AddBookManualPage from './pages/AddBookManualPage.jsx'
+import AddBookPage from './pages/AddBookPage.jsx'
 
 export default function App() {
     return (
@@ -18,8 +17,9 @@ export default function App() {
                 <Route path="buecher" element={<PlaceholderPage title="Alle Bücher" />} />
                 <Route path="buecher/:bookId" element={<PlaceholderPage title="Buchdetail" />} />
                 <Route path="suche" element={<SearchPage />} />
-                <Route path="erfassen" element={<AddBookIsbnPage />} />
-                <Route path="erfassen/ohne-isbn" element={<AddBookManualPage />} />
+                {/* /erfassen = mit ISBN, /erfassen/ohne-isbn = manuell. Eine Route,
+                    damit die Eingaben beim Umschalten stehen bleiben. */}
+                <Route path="erfassen/:mode?" element={<AddBookPage />} />
 
                 <Route path="*" element={<PlaceholderPage title="Seite nicht gefunden" />} />
             </Route>
