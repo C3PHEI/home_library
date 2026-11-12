@@ -1,0 +1,119 @@
+﻿/* Alle Bücher (AllBooksPage.jsx). Seitenkopf: components/PageHead.css,
+   Liste: components/books/BookTable.css. Die Karte nutzt die ganze Breite. */
+
+.all-books-card {
+    padding: 18px;
+}
+
+/* Werkzeugleiste: Sortierung und Filter nebeneinander, rechts Anzahl und "Zurücksetzen" */
+.all-books-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.all-books-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+.all-books-filter label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #596254;
+}
+
+.all-books-filter .select {
+    width: 100%;
+    min-width: 150px;
+    max-width: 260px;
+    height: 42px;
+}
+
+.all-books-tools-end {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: auto;
+    min-height: 42px;
+}
+
+.all-books-count {
+    font-size: 13px;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.all-books-hint {
+    margin: -6px 0 14px;
+    font-size: 12px;
+    color: var(--danger);
+}
+
+.all-books-list {
+    transition: opacity 120ms;
+}
+
+/* Neue Seite lädt: alte Bücher gedimmt stehen lassen */
+.all-books-list.is-loading {
+    opacity: 0.55;
+}
+
+/* Keine Bücher oder kein Treffer für die Filter */
+.all-books-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 44px 20px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.all-books-empty h2 {
+    margin: 6px 0 0;
+    font-size: 22px;
+}
+
+.all-books-empty p {
+    max-width: 460px;
+    margin: 0 0 10px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* iPad hochkant: Filter in zwei Spalten */
+@media (max-width: 1100px) {
+    .all-books-tools {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .all-books-filter .select {
+        max-width: none;
+    }
+    .all-books-tools-end {
+        grid-column: 1 / -1;
+        justify-content: space-between;
+        margin-left: 0;
+    }
+}
+
+/* Handy */
+@media (max-width: 700px) {
+    .all-books-card {
+        padding: 14px;
+    }
+    .all-books-filter .select {
+        min-width: 0;
+        height: 46px;
+        font-size: 16px; /* verhindert Zoom beim Antippen auf dem iPhone */
+    }
+    .all-books-page .page-actions,
+    .all-books-page .page-actions .btn {
+        width: 100%;
+    }
+}
