@@ -1,0 +1,37 @@
+﻿/* Umschalter (Segmented.jsx), Masse aus dem neuen Mock (.segmented) */
+.segmented {
+    display: inline-flex;
+    gap: 3px;
+    padding: 4px;
+    border-radius: var(--radius);
+    background: #E9E5DA;
+}
+
+.segmented-option {
+    min-height: 38px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 9px;
+    background: none;
+    font-family: inherit;
+    font-size: 13px;
+    color: #677064;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.segmented-option:hover {
+    color: var(--text);
+}
+
+.segmented-option[aria-pressed='true'] {
+    background: var(--surface);
+    font-weight: 600;
+    color: var(--accent);
+    box-shadow: 0 2px 5px rgba(68, 57, 29, 0.07);
+}
+
+@media (max-width: 700px) {
+    .segmented { display: flex; }
+    .segmented-option { flex: 1; min-height: 42px; padding: 0 8px; }
+}
