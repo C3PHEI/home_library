@@ -1,0 +1,174 @@
+﻿/* Buchdetail (BookDetailPage.jsx), Masse aus dem neuen Mock (.detail-card).
+   "← Zurück" (.back-link) kommt aus SlotPage.css. Die Karte nutzt die ganze Breite. */
+
+.book-detail-page > .notice {
+    margin-bottom: 14px;
+}
+
+/* Cover links, rechts Kopf, Knöpfe und Angaben untereinander */
+.detail-card {
+    display: grid;
+    grid-template-columns: 160px minmax(0, 1fr);
+    grid-template-areas:
+        'cover head'
+        'cover actions'
+        'cover grid';
+    grid-template-rows: auto auto 1fr;
+    column-gap: 28px;
+    padding: 24px;
+}
+
+.detail-card > .book-cover { grid-area: cover; }
+.detail-head { grid-area: head; min-width: 0; }
+.detail-actions { grid-area: actions; }
+.detail-grid { grid-area: grid; }
+
+.detail-title {
+    margin: 7px 0 0;
+    font-size: clamp(27px, 3vw, 36px);
+    overflow-wrap: anywhere;
+}
+
+.detail-authors {
+    margin-top: 5px;
+    font-size: 16px;
+    color: #6F766B;
+    overflow-wrap: anywhere;
+}
+
+.detail-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 20px 0;
+}
+
+/* Angaben: zwei Spalten, auf dem PC drei */
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+    gap: 0 25px;
+    margin: 0;
+    padding-top: 12px;
+    border-top: 1px solid #E8E2D7;
+}
+
+.detail-item {
+    min-width: 0;
+    padding: 11px 0;
+    border-bottom: 1px solid #EEE9DF;
+}
+
+.detail-item.is-wide {
+    grid-column: 1 / -1;
+}
+
+.detail-item dt {
+    margin-bottom: 4px;
+    font-size: 11px;
+    color: #898B7E;
+}
+
+.detail-item dd {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.detail-item dd.is-empty {
+    font-weight: 400;
+    color: var(--text-faint);
+}
+
+.detail-item dd.is-mono {
+    font-family: var(--mono);
+    font-weight: 500;
+}
+
+/* Notiz: Zeilenumbrüche aus dem Textfeld behalten */
+.detail-item.is-wide dd {
+    font-weight: 500;
+    white-space: pre-wrap;
+}
+
+.detail-location {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--accent);
+}
+
+.detail-location:hover {
+    text-decoration: underline;
+}
+
+.detail-location svg {
+    flex-shrink: 0;
+}
+
+/* Buch nicht gefunden oder Fehler beim Laden */
+.detail-missing {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 50px 25px;
+    text-align: center;
+}
+
+.detail-missing h2 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.detail-missing p {
+    max-width: 460px;
+    margin: 0 0 12px;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+@media (min-width: 1280px) {
+    .detail-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+/* Handy: kleines Cover neben dem Titel, Knöpfe und Angaben über die ganze Breite */
+@media (max-width: 700px) {
+    .detail-card {
+        grid-template-columns: 86px minmax(0, 1fr);
+        grid-template-areas:
+            'cover head'
+            'actions actions'
+            'grid grid';
+        grid-template-rows: auto;
+        column-gap: 16px;
+        padding: 17px;
+    }
+
+    .detail-card > .book-cover {
+        width: 86px;
+        height: 118px;
+    }
+
+    .detail-authors {
+        font-size: 14px;
+    }
+
+    .detail-actions {
+        margin: 16px 0;
+    }
+
+    .detail-actions .btn {
+        flex: 1;
+        height: 44px;
+    }
+
+    .detail-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
