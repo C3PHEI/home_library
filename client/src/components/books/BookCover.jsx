@@ -1,8 +1,8 @@
 ﻿import { useState } from 'react'
 import './BookCover.css'
 
-// Cover-Vorschau. variant: 'tile' (Kachel, 168 px hoch), 'row' (Liste, 32 x 45 px)
-// oder 'hit' (Suchtreffer, 54 x 76 px)
+// Cover-Vorschau. variant: 'tile' (Kachel, 168 px hoch), 'row' (Liste, 32 x 45 px),
+// 'hit' (Suchtreffer, 53 x 70 px) oder 'pick' (Buch hinzufügen, 66 x 88 px)
 export default function BookCover({ src, variant = 'tile' }) {
     // Fehlt das Bild auf dem Server, wird auf den Platzhalter gewechselt
     const [failedSrc, setFailedSrc] = useState(null)
