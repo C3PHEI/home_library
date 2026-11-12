@@ -33,6 +33,25 @@
     box-shadow: none;
 }
 
+/* Buchdetail: grosses "Buch" wie im neuen Mock (.detail-cover) */
+.book-cover-detail {
+    width: 160px;
+    height: 218px;
+    flex-shrink: 0;
+    border: 0;
+    border-radius: 8px 12px 12px 8px;
+    box-shadow: 3px 5px 12px rgba(72, 61, 40, 0.16);
+}
+
+.book-cover-detail.book-cover-missing {
+    box-shadow: none;
+}
+
+.book-cover-detail.book-cover-missing svg {
+    width: 34px;
+    height: 34px;
+}
+
 /* Vorschau beim Hinzufügen: ein "Buch" wie in den Suchtreffern, etwas grösser */
 .book-cover-pick {
     width: 66px;
