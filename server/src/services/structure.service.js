@@ -5,6 +5,14 @@ import { FURNITURE_ICONS, ROOM_ICONS } from '../validation/icons.js'
 
 const NAME_MAX_LENGTH = 60
 
+const MAX_SLOTS = 40 // Fächer pro Möbelstück, wie im Dialog "Möbelstück hinzufügen"
+
+// Muss zum CHECK auf furniture.type und zu client/src/utils/furniture.js passen
+const FURNITURE_TYPES = new Set(['shelf', 'cabinet', 'table', 'nightstand', 'other'])
+
+// So heissen Möbel ohne Raum in der Übersicht (location.mapper.js)
+const NO_ROOM_LABEL = 'Ohne Raum'
+
 // ---------------------------------------------------------------------------
 // Helper
 // ---------------------------------------------------------------------------
@@ -48,6 +56,107 @@ function parseIcon(value, allowed) {
 // 23505 = unique_violation (Name schon vergeben)
 function isUniqueViolation(err) {
     return err.code === '23505'
+}
+
+// Fächer für ein neues Möbelstück:
+//   slotLabels: ["Oben", "Mitte"]  -> diese Namen
+//   slotCount: 3                   -> "Fach 1" bis "Fach 3"
+//   slotCount: 1                   -> "Ablage" (wie bei Tischen, siehe utils/location.js)
+function parseSlotLabels(body) {
+    if (body.slotLabels !== undefined) {
+        const list = body.slotLabels
+        if (!Array.isArray(list) || list.length === 0) {
+            throw new ValidationError({ slotLabels: 'Mindestens ein Fach angeben' })
+        }
+        if (list.length > MAX_SLOTS) {
+            throw new ValidationError({ slotLabels: `Höchstens ${MAX_SLOTS} Fächer` })
+        }
+        const labels = list.map((label) => cleanName(label, 'slotLabels'))
+        const seen = new Set()
+        for (const label of labels) {
+            const key = label.toLowerCase()
+            if (seen.has(key)) {
+                throw new ValidationError({ slotLabels: `«${label}» kommt mehrmals vor` })
+            }
+            seen.add(key)
+        }
+        return labels
+    }
+
+    const count = body.slotCount
+    if (!Number.isInteger(count) || count < 1 || count > MAX_SLOTS) {
+        throw new ValidationError({ slotCount: `Eine Zahl von 1 bis ${MAX_SLOTS} eingeben` })
+    }
+    if (count === 1) return ['Ablage']
+    return Array.from({ length: count }, (_, index) => `Fach ${index + 1}`)
+}
+
+// ---------------------------------------------------------------------------
+// Anlegen
+// ---------------------------------------------------------------------------
+
+// POST /api/furniture
+// Body: { "room": "Flur", "type": "cabinet", "name": "Schrank im Flur", "slotCount": 4 }
+//   oder statt slotCount: "slotLabels": ["Oben", "Mitte", "Unten"]
+//   optional "icon": "door-open"
+// Gibt es den Raum noch nicht, entsteht er mit dem Möbelstück
+// (ein Raum ist nur die Spalte furniture.room).
+export async function createFurniture(body = {}) {
+    const roomInput = cleanName(body.room, 'room')
+    if (roomInput.toLowerCase() === NO_ROOM_LABEL.toLowerCase()) {
+        throw new ValidationError({ room: 'Bitte einen anderen Namen wählen' })
+    }
+    if (!FURNITURE_TYPES.has(body.type)) {
+        throw new ValidationError({ type: 'Bitte eine Art wählen' })
+    }
+    const name = cleanName(body.name, 'name')
+    const icon = body.icon === undefined ? null : parseIcon(body.icon, FURNITURE_ICONS)
+    const labels = parseSlotLabels(body)
+
+    try {
+        return await withTransaction(async (client) => {
+            // "wohnzimmer" landet im bestehenden Raum "Wohnzimmer"
+            const room = (await structureRepository.findRoomName(client, roomInput)) ?? roomInput
+            const furniture = await structureRepository.insertFurniture(client, {
+                name, type: body.type, room, icon,
+            })
+            const slots = await structureRepository.insertSlots(client, furniture.id, labels)
+            return { ...furniture, slots }
+        })
+    } catch (err) {
+        if (isUniqueViolation(err)) {
+            throw new ConflictError('Diesen Namen gibt es schon', { name: 'Ein anderes Möbelstück heisst schon so' })
+        }
+        throw err
+    }
+}
+
+// POST /api/furniture/:id/slots   Body: { "label": "Ganz unten" }
+// Das neue Fach kommt ans Ende des Möbelstücks.
+export async function createSlot(furnitureIdParam, body = {}) {
+    const furnitureId = parseId(furnitureIdParam)
+    const label = cleanName(body.label, 'label')
+    const duplicate = () =>
+        new ConflictError('Diesen Namen gibt es schon', { label: 'Ein anderes Fach in diesem Möbel heisst schon so' })
+
+    try {
+        return await withTransaction(async (client) => {
+            // Sperre: zwei gleichzeitige Anfragen legen nicht dasselbe Fach an
+            const found = await structureRepository.lockFurniture(client, furnitureId)
+            if (found.length === 0) throw new NotFoundError(`Möbelstück ${furnitureId} nicht gefunden`)
+
+            const existing = await structureRepository.findSlotLabels(client, furnitureId)
+            if (existing.length >= MAX_SLOTS) {
+                throw new ValidationError({ label: `Ein Möbelstück hat höchstens ${MAX_SLOTS} Fächer` })
+            }
+            if (existing.some((other) => other.toLowerCase() === label.toLowerCase())) throw duplicate()
+
+            return structureRepository.insertSlot(client, furnitureId, label)
+        })
+    } catch (err) {
+        if (isUniqueViolation(err)) throw duplicate()
+        throw err
+    }
 }
 
 // ---------------------------------------------------------------------------
