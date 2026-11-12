@@ -1,8 +1,9 @@
 ﻿import { ATTEMPT_LABELS, SOURCES } from './sources.js'
 import './LookupSources.css'
 
-// Box "Abrufreihenfolge": welche Quelle was geantwortet hat (attempts aus GET /api/isbn).
-// Kam das Ergebnis aus dem Zwischenspeicher, lässt es sich neu abfragen.
+// Zeile "Abrufreihenfolge" unter dem ISBN-Feld: welche Quelle was geantwortet hat
+// (attempts aus GET /api/isbn). Kam das Ergebnis aus dem Zwischenspeicher,
+// lässt es sich neu abfragen.
 export default function LookupSources({ lookup, onRefresh }) {
     const result = lookup.status === 'done' ? lookup.result : null
 
@@ -14,47 +15,37 @@ export default function LookupSources({ lookup, onRefresh }) {
     }
 
     return (
-        <section className="side-card" aria-labelledby="lookup-sources-title">
-            <h2 id="lookup-sources-title" className="side-card-title">
+        <div className="lookup-box">
+            <span id="lookup-sources-title" className="lookup-box-title">
                 Abrufreihenfolge
-            </h2>
+            </span>
 
-            <ol className="lookup-sources">
+            <ol className="lookup-sources" aria-labelledby="lookup-sources-title">
                 {SOURCES.map((source, index) => {
                     const status = statusFor(source.key)
                     return (
                         <li key={source.key} className="lookup-source">
-                            <span className="lookup-source-name">
-                                <span className="lookup-source-number">{index + 1}</span>
-                                {source.listLabel}
+                            <span className="lookup-source-number" aria-hidden="true">
+                                {index + 1}
                             </span>
-                            <span className={`lookup-source-status is-${status.tone || 'none'}`}>{status.text}</span>
+                            <span className="lookup-source-name">{source.label}</span>
+                            {status.text && (
+                                <span className={`lookup-source-status is-${status.tone || 'none'}`}>{status.text}</span>
+                            )}
                         </li>
                     )
                 })}
-                <li className="lookup-source">
-                    <span className="lookup-source-name">
-                        <span className="lookup-source-number">{SOURCES.length + 1}</span>
-                        Manuelle Eingabe
-                    </span>
-                    <span className="lookup-source-status">immer möglich</span>
-                </li>
             </ol>
 
             {result?.cached && (
                 <div className="lookup-cached">
-                    <span>Aus dem Zwischenspeicher vom {formatDate(result.fetchedAt)}.</span>
+                    <span>Schon einmal abgefragt am {formatDate(result.fetchedAt)}.</span>
                     <button type="button" className="lookup-refresh" onClick={onRefresh}>
                         Neu abfragen
                     </button>
                 </div>
             )}
-
-            <p className="side-card-note">
-                Der Abruf läuft über das Backend, damit Ergebnisse zwischengespeichert werden und die Limits der
-                Anbieter eingehalten sind.
-            </p>
-        </section>
+        </div>
     )
 }
 
