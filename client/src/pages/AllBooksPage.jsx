@@ -4,6 +4,7 @@ import { BookOpen, Download, Plus, RotateCcw } from 'lucide-react'
 import { BOOKS_CSV_URL, getBookFilters, getBooks } from '../api/books.js'
 import { useApi } from '../hooks/useApi.js'
 import { formatCount, plural } from '../utils/format.js'
+import { useStoredState } from '../hooks/useStoredState.js'
 import PageHead from '../components/PageHead.jsx'
 import BookTable from '../components/books/BookTable.jsx'
 import Pagination from '../components/Pagination.jsx'
@@ -17,7 +18,10 @@ const SORT_OPTIONS = [
     { value: 'created', label: 'Hinzugefügt', dir: 'desc' },
 ]
 const DEFAULT_SORT = 'title'
-const PAGE_SIZE = 25
+// Bücher pro Seite. Das Backend liefert höchstens 100 auf einmal.
+const PAGE_SIZES = [10, 25, 50, 100]
+const DEFAULT_PAGE_SIZE = 25
+const PAGE_SIZE_OPTIONS = PAGE_SIZES.map((size) => ({ value: size, label: String(size) }))
 
 // Nur um zu wissen, wie viele Bücher es insgesamt gibt (ohne Filter)
 const loadTotal = (options) => getBooks({ limit: 1 }, options)
@@ -34,13 +38,15 @@ export default function AllBooksPage() {
     const author = searchParams.get('author') ?? ''
     const year = searchParams.get('year') ?? ''
     const filtered = Boolean(language || author || year)
+    const [storedPageSize, setPageSize] = useStoredState('bibliothek.buecher.proSeite', DEFAULT_PAGE_SIZE)
+    const pageSize = PAGE_SIZES.includes(storedPageSize) ? storedPageSize : DEFAULT_PAGE_SIZE
 
     const loadBooks = useCallback(
         (options) => {
             const dir = SORT_OPTIONS.find((option) => option.value === sort).dir
-            return getBooks({ sort, dir, page, limit: PAGE_SIZE, language, author, year }, options)
+            return getBooks({ sort, dir, page, limit: pageSize, language, author, year }, options)
         },
-        [sort, page, language, author, year],
+        [sort, page, pageSize, language, author, year],
     )
     const books = useApi(loadBooks)
     const filters = useApi(getBookFilters)
@@ -50,7 +56,7 @@ export default function AllBooksPage() {
     const totalAll = totals.data?.total ?? null
 
     // Nach Seiten-, Sortier- oder Filterwechsel wieder oben beginnen
-    const listKey = `${page}|${sort}|${language}|${author}|${year}`
+    const listKey = `${page}|${sort}|${pageSize}|${language}|${author}|${year}`
     const lastListKey = useRef(listKey)
     useEffect(() => {
         if (lastListKey.current === listKey) return // erster Aufruf (auch doppelt im StrictMode)
@@ -70,6 +76,12 @@ export default function AllBooksPage() {
             },
             { replace: true },
         )
+    }
+
+    // Andere Seitengrösse: wieder bei Seite 1 beginnen
+    function handlePageSizeChange(event) {
+        setPageSize(Number(event.target.value))
+        updateParams({ page: null })
     }
 
     function handleSortChange(event) {
@@ -144,6 +156,13 @@ export default function AllBooksPage() {
                         onChange={(event) => handleFilterChange('year', event.target.value)}
                         allLabel="Alle Jahre"
                         options={filterOptions(filters.data?.years, year)}
+                    />
+                    <FilterSelect
+                        id="books-page-size"
+                        label="Bücher pro Seite"
+                        value={pageSize}
+                        onChange={handlePageSizeChange}
+                        options={PAGE_SIZE_OPTIONS}
                     />
 
                     <div className="all-books-tools-end">

@@ -34,6 +34,10 @@
     height: 42px;
 }
 
+.all-books-filter #books-page-size {
+    min-width: 110px;
+}
+
 .all-books-tools-end {
     display: flex;
     align-items: center;
