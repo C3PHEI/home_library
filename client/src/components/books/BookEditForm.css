@@ -1,0 +1,81 @@
+﻿/* "Buch bearbeiten" (BookEditForm.jsx), Masse aus dem neuen Mock (.form-card).
+   Die Karte nutzt die ganze Breite. Ab 1280 px stehen die Buchangaben links
+   und das Cover rechts, darunter (iPad, Handy) untereinander. */
+
+.edit-card {
+    padding: 25px;
+}
+
+.edit-title {
+    margin: 8px 0 20px;
+}
+
+.edit-card > .notice {
+    margin-bottom: 22px;
+}
+
+.edit-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 26px 36px;
+    margin-bottom: 26px;
+}
+
+.edit-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+}
+
+.edit-section-title {
+    margin: 0 0 2px;
+    font: 500 20px var(--serif);
+    color: var(--text);
+}
+
+@media (min-width: 1280px) {
+    .edit-grid {
+        grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+        align-items: start;
+    }
+}
+
+.edit-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 20px;
+    border-top: 1px solid var(--divider);
+}
+
+.edit-actions .btn {
+    height: 44px;
+}
+
+/* "Noch nötig: Titel" steht links, die Knöpfe rechts */
+.edit-blocked {
+    margin-right: auto;
+    font-size: 12.5px;
+    color: var(--text-muted);
+}
+
+/* Handy: weniger Rand, Knöpfe über die ganze Breite */
+@media (max-width: 700px) {
+    .edit-card {
+        padding: 18px;
+    }
+    .edit-grid {
+        gap: 22px;
+        margin-bottom: 22px;
+    }
+    .edit-blocked {
+        flex-basis: 100%;
+    }
+    .edit-actions .btn {
+        flex: 1;
+        height: 48px;
+    }
+}
