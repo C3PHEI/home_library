@@ -5,6 +5,66 @@
 // Das Raum-Icon steht in room_icon (eine Zeile pro Raum mit eigenem Icon).
 
 // ---------------------------------------------------------------------------
+// Anlegen: läuft in einer Transaktion (client), damit nie ein Möbelstück
+// ohne seine Fächer entsteht.
+// ---------------------------------------------------------------------------
+
+// Schreibweise eines bestehenden Raums ("wohnzimmer" -> "Wohnzimmer"), sonst null
+export async function findRoomName(client, room) {
+    const { rows } = await client.query(
+        'SELECT room FROM furniture WHERE lower(room) = lower($1) ORDER BY id LIMIT 1',
+        [room]
+    )
+    return rows[0]?.room ?? null
+}
+
+// Neues Möbelstück kommt ans Ende seines Raums (sort_order in 10er-Schritten wie im Seed)
+export async function insertFurniture(client, { name, type, room, icon }) {
+    const { rows } = await client.query(
+        `INSERT INTO furniture (name, type, room, icon, sort_order)
+         VALUES ($1, $2, $3, $4,
+                 (SELECT COALESCE(MAX(sort_order), 0) + 10 FROM furniture WHERE room = $3))
+         RETURNING id, name, type, room, icon`,
+        [name, type, room, icon]
+    )
+    return rows[0]
+}
+
+// labels in der gewünschten Reihenfolge (von oben nach unten)
+export async function insertSlots(client, furnitureId, labels) {
+    const { rows } = await client.query(
+        `INSERT INTO shelf_slot (furniture_id, label, sort_order)
+         SELECT $1, t.label, t.position::int
+           FROM unnest($2::text[]) WITH ORDINALITY AS t(label, position)
+         RETURNING id, label, sort_order`,
+        [furnitureId, labels]
+    )
+    return rows
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map((row) => ({ id: row.id, label: row.label, bookCount: 0 }))
+}
+
+export async function findSlotLabels(client, furnitureId) {
+    const { rows } = await client.query(
+        'SELECT label FROM shelf_slot WHERE furniture_id = $1',
+        [furnitureId]
+    )
+    return rows.map((row) => row.label)
+}
+
+// Ein einzelnes Fach ans Ende eines bestehenden Möbelstücks
+export async function insertSlot(client, furnitureId, label) {
+    const { rows } = await client.query(
+        `INSERT INTO shelf_slot (furniture_id, label, sort_order)
+         VALUES ($1, $2,
+                 (SELECT COALESCE(MAX(sort_order), 0) + 1 FROM shelf_slot WHERE furniture_id = $1))
+         RETURNING id, label`,
+        [furnitureId, label]
+    )
+    return { id: rows[0].id, label: rows[0].label, furnitureId, bookCount: 0 }
+}
+
+// ---------------------------------------------------------------------------
 // Umbenennen
 // ---------------------------------------------------------------------------
 
