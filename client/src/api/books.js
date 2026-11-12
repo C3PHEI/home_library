@@ -27,3 +27,37 @@ export function getBookFilters(options) {
 export function createBook(book, options) {
     return apiSend('POST', '/books', book, options)
 }
+
+// GET /api/books/:id
+// -> { id, title, author, isbn13, isbn10, publisher, publishedYear, language, pages, note,
+//      coverUrl, coverThumbUrl, coverSource, createdAt, updatedAt, location }
+export function getBook(id, options) {
+    return apiGet(`/books/${id}`, options)
+}
+
+// PATCH /api/books/:id
+// Body: nur die Felder, die sich ändern (title, author, isbn, publisher, publishedYear, language, pages, note).
+// null leert ein freiwilliges Feld. -> { book, warnings: [{ code: 'DUPLICATE_ISBN', ... }] }
+export function updateBook(id, changes, options) {
+    return apiSend('PATCH', `/books/${id}`, changes, options)
+}
+
+// PATCH /api/books/:id/location   Body: { shelfSlotId } -> das Buch mit neuem Standort
+export function moveBook(id, shelfSlotId, options) {
+    return apiSend('PATCH', `/books/${id}/location`, { shelfSlotId }, options)
+}
+
+// PUT /api/books/:id/cover   Body: { coverTempId } -> das Buch mit neuem Cover
+export function setBookCover(id, coverTempId, options) {
+    return apiSend('PUT', `/books/${id}/cover`, { coverTempId }, options)
+}
+
+// DELETE /api/books/:id/cover -> das Buch ohne Cover
+export function deleteBookCover(id, options) {
+    return apiSend('DELETE', `/books/${id}/cover`, undefined, options)
+}
+
+// DELETE /api/books/:id -> 204, das Buch ist endgültig weg
+export function deleteBook(id, options) {
+    return apiSend('DELETE', `/books/${id}`, undefined, options)
+}
