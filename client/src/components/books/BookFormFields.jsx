@@ -2,16 +2,16 @@
 import { LANGUAGES, languageLabel } from '../../utils/languages.js'
 import './BookFormFields.css'
 
-// Die Buchfelder aus Erfassen-ISBN.html (Titel bis Notiz).
-// Auch für "Erfassen ohne ISBN" gedacht, darum ohne ISBN-Feld.
+// Die Buchfelder aus dem neuen Mock ("Buchangaben"), in dieser Reihenfolge:
+// Titel | Autor, Standort | (ISBN), Verlag | Jahr, Sprache | Seitenzahl | Notiz
 //
 // values:    { title, author, publisher, publishedYear, language, pages, shelfSlotId, note } (alles Strings)
 // errors:    { title: 'Pflichtfeld', ... }
 // onChange:  (name, value) => void
 // locations: { groups, loading, error, reload } für das Standort-Dropdown
-
-// placeholders: optionale Platzhalter { title, author, note } (Erfassen ohne ISBN zeigt Beispiele)
-export default function BookFormFields({ values, errors, onChange, locations, placeholders = {} }) {
+// isbn:      optional { value, error, onChange }. Nur beim manuellen Eintragen:
+//            mit "Mit ISBN beginnen" steht das ISBN-Feld schon oben.
+export default function BookFormFields({ values, errors, onChange, locations, isbn }) {
     function bind(name) {
         return {
             name,
@@ -28,22 +28,68 @@ export default function BookFormFields({ values, errors, onChange, locations, pl
 
     return (
         <div className="book-fields">
-            <Field id="book-title" label="Titel (Pflicht)" error={errors.title} wide>
-                {(props) => <input {...props} {...bind('title')} type="text" className="input field-input" maxLength={500} />}
+            <Field id="book-title" label="Titel *" error={errors.title} wide>
+                {(props) => (
+                    <input
+                        {...props}
+                        {...bind('title')}
+                        type="text"
+                        className="input field-input"
+                        placeholder="Wie heisst das Buch?"
+                        maxLength={500}
+                    />
+                )}
             </Field>
 
-            <Field
-                id="book-author"
-                label="Autor (Pflicht)"
-                hint="Mehrere Autoren mit Komma trennen."
-                error={errors.author}
-                wide
-            >
-                {(props) => <input {...props} {...bind('author')} type="text" className="input field-input" maxLength={500} />}
+            <Field id="book-author" label="Autorin / Autor *" error={errors.author}>
+                {(props) => (
+                    <input
+                        {...props}
+                        {...bind('author')}
+                        type="text"
+                        className="input field-input"
+                        placeholder="Mehrere mit Komma trennen"
+                        maxLength={500}
+                    />
+                )}
             </Field>
+
+            <LocationField
+                value={values.shelfSlotId}
+                error={errors.shelfSlotId}
+                onChange={(value) => onChange('shelfSlotId', value)}
+                locations={locations}
+            />
+
+            {isbn && (
+                <Field id="book-isbn" label="ISBN" error={isbn.error}>
+                    {(props) => (
+                        <input
+                            {...props}
+                            name="isbn"
+                            value={isbn.value}
+                            onChange={(event) => isbn.onChange(event.target.value)}
+                            type="text"
+                            className="input field-input is-mono"
+                            placeholder="Optional"
+                            autoComplete="off"
+                            spellCheck={false}
+                        />
+                    )}
+                </Field>
+            )}
 
             <Field id="book-publisher" label="Verlag" error={errors.publisher}>
-                {(props) => <input {...props} {...bind('publisher')} type="text" className="input field-input" maxLength={500} />}
+                {(props) => (
+                    <input
+                        {...props}
+                        {...bind('publisher')}
+                        type="text"
+                        className="input field-input"
+                        placeholder="Optional"
+                        maxLength={500}
+                    />
+                )}
             </Field>
 
             <Field id="book-year" label="Erscheinungsjahr" error={errors.publishedYear}>
@@ -54,7 +100,8 @@ export default function BookFormFields({ values, errors, onChange, locations, pl
                         type="text"
                         inputMode="numeric"
                         maxLength={4}
-                        className="input field-input is-mono"
+                        className="input field-input"
+                        placeholder="z. B. 2021"
                     />
                 )}
             </Field>
@@ -81,26 +128,20 @@ export default function BookFormFields({ values, errors, onChange, locations, pl
                         type="text"
                         inputMode="numeric"
                         maxLength={6}
-                        className="input field-input is-mono"
+                        className="input field-input"
+                        placeholder="Optional"
                     />
                 )}
             </Field>
-
-            <LocationField
-                value={values.shelfSlotId}
-                error={errors.shelfSlotId}
-                onChange={(value) => onChange('shelfSlotId', value)}
-                locations={locations}
-            />
 
             <Field id="book-note" label="Notiz" error={errors.note} wide>
                 {(props) => (
                     <textarea
                         {...props}
                         {...bind('note')}
-                        rows={2}
+                        rows={3}
                         className="input field-input"
-                        placeholder={placeholders.note ?? 'Freitext'}
+                        placeholder="Zum Beispiel: Geschenk von Oma"
                         maxLength={5000}
                     />
                 )}
@@ -122,10 +163,8 @@ function LocationField({ value, error, onChange, locations }) {
     return (
         <Field
             id="book-location"
-            label="Standort (Pflicht)"
-            hint="Genau ein Standort. Nach dem Speichern steht die Auswahl wieder leer."
+            label="Wo steht es? *"
             error={error ?? (loadError ? `Die Standorte konnten nicht geladen werden: ${loadError.message}` : undefined)}
-            wide
             after={
                 loadError && (
                     <button type="button" className="btn btn-secondary book-fields-retry" onClick={reload}>
@@ -138,7 +177,7 @@ function LocationField({ value, error, onChange, locations }) {
                 <select
                     {...props}
                     name="shelfSlotId"
-                    className={value ? 'select field-input is-chosen' : 'select field-input'}
+                    className="select field-input"
                     value={value}
                     onChange={(event) => onChange(event.target.value)}
                     disabled={!ready}
