@@ -10,27 +10,31 @@ import './CoverSection.css'
 //   online  Cover aus dem ISBN-Abruf  -> dessen tempId wird mitgeschickt
 //   upload  eigenes Foto              -> tempId aus POST /api/covers/upload
 //   none    kein Cover                -> keine tempId
+//   current nur beim Bearbeiten: das gespeicherte Cover bleibt
 // Fest gespeichert wird nur das gewählte Cover, und erst beim Speichern des Buchs.
 //
 // online:   cover aus GET /api/isbn oder null
 // cover:    { choice, upload, uploading, error } (State der Seite)
 // onChoose: (choice) => void
 // onUpload: (file) => void
+// current:  beim Bearbeiten das gespeicherte Cover { previewUrl } (Auswahl "Bisheriges Cover")
 // withLookup: true bei "Mit ISBN beginnen" (Hinweis auf das Online-Cover)
-export default function CoverSection({ online, cover, onChoose, onUpload, withLookup }) {
+export default function CoverSection({ online, current, cover, onChoose, onUpload, withLookup }) {
     const fileInputRef = useRef(null)
     const [dragging, setDragging] = useState(false)
 
     const options = [
+        current && { value: 'current', label: 'Bisheriges Cover' },
         online && { value: 'online', label: `Online-Cover von ${sourceLabel(online.source)}` },
         cover.upload && { value: 'upload', label: 'Eigenes Bild' },
         { value: 'none', label: 'Ohne Cover' },
     ].filter(Boolean)
 
     const previewUrl =
-        cover.choice === 'online' ? online?.previewUrl
-            : cover.choice === 'upload' ? cover.upload?.previewUrl
-                : null
+        cover.choice === 'current' ? current?.previewUrl
+            : cover.choice === 'online' ? online?.previewUrl
+                : cover.choice === 'upload' ? cover.upload?.previewUrl
+                    : null
 
     function handleFileChange(event) {
         const file = event.target.files?.[0]
@@ -103,7 +107,7 @@ export default function CoverSection({ online, cover, onChoose, onUpload, withLo
                     </button>
                 </fieldset>
 
-                <p className="cover-section-text">{coverText(cover.choice, online, withLookup)}</p>
+                <p className="cover-section-text">{coverText(cover.choice, online, withLookup, current)}</p>
 
                 {cover.error && (
                     <p className="cover-section-error" role="alert">
@@ -115,7 +119,13 @@ export default function CoverSection({ online, cover, onChoose, onUpload, withLo
     )
 }
 
-function coverText(choice, online, withLookup) {
+function coverText(choice, online, withLookup, current) {
+    if (choice === 'current') {
+        return 'Das Cover bleibt, wie es ist.'
+    }
+    if (current && choice === 'none') {
+        return 'Das bisherige Cover wird beim Speichern entfernt.'
+    }
     if (choice === 'online') {
         return `Von ${sourceLabel(online.source)} geholt. Wird beim Speichern übernommen.`
     }
