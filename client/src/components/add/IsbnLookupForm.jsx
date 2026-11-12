@@ -1,4 +1,6 @@
-﻿import { checkIsbn } from '../../utils/isbn.js'
+﻿import { Search } from 'lucide-react'
+import { checkIsbn } from '../../utils/isbn.js'
+import '../form/Field.css'
 import './IsbnLookupForm.css'
 
 // ISBN-Feld mit "Daten holen". Eigenes <form>, damit Enter im Feld den Abruf
@@ -17,7 +19,7 @@ export default function IsbnLookupForm({ value, onChange, onLookup, error, loadi
 
     return (
         <form className="isbn-form" onSubmit={handleSubmit} noValidate>
-            <label htmlFor="isbn" className="isbn-label">
+            <label htmlFor="isbn" className="field-label">
                 ISBN
             </label>
 
@@ -27,10 +29,10 @@ export default function IsbnLookupForm({ value, onChange, onLookup, error, loadi
                     id="isbn"
                     name="isbn"
                     type="text"
-                    className="input isbn-input"
+                    className="input field-input is-mono isbn-input"
                     value={value}
                     onChange={(event) => onChange(event.target.value)}
-                    placeholder="z. B. 978-3-257-22800-7"
+                    placeholder="Zum Beispiel 978-3-257-22800-7"
                     autoComplete="off"
                     spellCheck={false}
                     enterKeyHint="search"
@@ -38,7 +40,8 @@ export default function IsbnLookupForm({ value, onChange, onLookup, error, loadi
                     aria-describedby="isbn-hint"
                     autoFocus
                 />
-                <button type="submit" className="btn btn-primary isbn-button" disabled={loading}>
+                <button type="submit" className="btn btn-secondary isbn-button" disabled={loading}>
+                    <Search size={16} aria-hidden="true" />
                     {loading ? 'Wird geholt …' : 'Daten holen'}
                 </button>
             </div>
@@ -51,7 +54,7 @@ export default function IsbnLookupForm({ value, onChange, onLookup, error, loadi
                 {message ??
                     (valid
                         ? `Prüfziffer stimmt (${check.kind}).`
-                        : 'ISBN-10 oder ISBN-13. Die Prüfziffer wird beim Eintippen geprüft.')}
+                        : 'Die ISBN steht meist hinten auf dem Buch beim Strichcode. 10 oder 13 Stellen.')}
             </span>
         </form>
     )
