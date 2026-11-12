@@ -20,11 +20,11 @@ export const COVER_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 export const BOOK_FIELD_IDS = {
     title: 'book-title',
     author: 'book-author',
+    shelfSlotId: 'book-location',
     publisher: 'book-publisher',
     publishedYear: 'book-year',
     language: 'book-language',
     pages: 'book-pages',
-    shelfSlotId: 'book-location',
     note: 'book-note',
 }
 
