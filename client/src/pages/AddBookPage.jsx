@@ -292,28 +292,36 @@ export default function AddBookPage() {
             <div className="card add-card">
                 {saved && <SavedNotice result={saved} />}
 
-                {mode === 'isbn' && (
-                    <section className="add-section" aria-labelledby="add-isbn-title">
-                        <h2 id="add-isbn-title" className="add-section-title">
-                            ISBN-Eingabe
-                        </h2>
+                {/* Breiter Bildschirm: zwei Spalten (AddBookPage.css), sonst alles untereinander */}
+                <div className={mode === 'isbn' ? 'add-grid has-isbn' : 'add-grid'}>
+                    {mode === 'isbn' && (
+                        <section className="add-section add-area-isbn" aria-labelledby="add-isbn-title">
+                            <h2 id="add-isbn-title" className="add-section-title">
+                                ISBN-Eingabe
+                            </h2>
 
-                        <IsbnLookupForm
-                            value={isbn}
-                            onChange={handleIsbnChange}
-                            onLookup={() => runLookup()}
-                            error={errors.isbn}
-                            loading={lookup.status === 'loading'}
-                            inputRef={isbnInputRef}
-                        />
+                            <IsbnLookupForm
+                                value={isbn}
+                                onChange={handleIsbnChange}
+                                onLookup={() => runLookup()}
+                                error={errors.isbn}
+                                loading={lookup.status === 'loading'}
+                                inputRef={isbnInputRef}
+                            />
 
-                        <LookupSources lookup={lookup} onRefresh={() => runLookup({ refresh: true })} />
-                        <LookupNotices lookup={lookup} onRetry={() => runLookup()} />
-                    </section>
-                )}
+                            <LookupSources lookup={lookup} onRefresh={() => runLookup({ refresh: true })} />
+                            <LookupNotices lookup={lookup} onRetry={() => runLookup()} />
+                        </section>
+                    )}
 
-                <form onSubmit={handleSubmit} noValidate aria-busy={saving}>
-                    <section className="add-section" aria-labelledby="add-fields-title">
+                    <form
+                        id="add-book-form"
+                        className="add-section add-area-fields"
+                        onSubmit={handleSubmit}
+                        noValidate
+                        aria-busy={saving}
+                        aria-labelledby="add-fields-title"
+                    >
                         <h2 id="add-fields-title" className="add-section-title">
                             Buchangaben
                         </h2>
@@ -330,9 +338,9 @@ export default function AddBookPage() {
                                 reload: locations.reload,
                             }}
                         />
-                    </section>
+                    </form>
 
-                    <section className="add-section" aria-labelledby="add-cover-title">
+                    <section className="add-section add-area-cover" aria-labelledby="add-cover-title">
                         <h2 id="add-cover-title" className="add-section-title">
                             Cover
                         </h2>
@@ -345,24 +353,25 @@ export default function AddBookPage() {
                             withLookup={mode === 'isbn'}
                         />
                     </section>
+                </div>
 
-                    {saveError && (
-                        <Notice variant="error" role="alert" title={`Speichern hat nicht geklappt: ${saveError.message}`}>
-                            Die Angaben bleiben stehen. Nochmals „Buch speichern“ versuchen.
-                        </Notice>
-                    )}
+                {saveError && (
+                    <Notice variant="error" role="alert" title={`Speichern hat nicht geklappt: ${saveError.message}`}>
+                        Die Angaben bleiben stehen. Nochmals „Buch speichern“ versuchen.
+                    </Notice>
+                )}
 
-                    <div className="add-actions">
-                        {blockedReason && !saving && <span className="add-blocked">{blockedReason}</span>}
-                        <button type="button" className="btn btn-outline" onClick={handleCancel}>
-                            Abbrechen
-                        </button>
-                        <button type="submit" className="btn btn-primary" disabled={!canSave}>
-                            <Check size={16} aria-hidden="true" />
-                            {saving ? 'Wird gespeichert …' : 'Buch speichern'}
-                        </button>
-                    </div>
-                </form>
+                {/* Die Knöpfe stehen ausserhalb des Formulars und gehören über form="..." dazu */}
+                <div className="add-actions">
+                    {blockedReason && !saving && <span className="add-blocked">{blockedReason}</span>}
+                    <button type="button" className="btn btn-outline" onClick={handleCancel}>
+                        Abbrechen
+                    </button>
+                    <button type="submit" form="add-book-form" className="btn btn-primary" disabled={!canSave}>
+                        <Check size={16} aria-hidden="true" />
+                        {saving ? 'Wird gespeichert …' : 'Buch speichern'}
+                    </button>
+                </div>
             </div>
         </div>
     )

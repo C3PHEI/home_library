@@ -1,31 +1,61 @@
 ﻿/* Buch hinzufügen (AddBookPage.jsx). Seitenkopf: components/PageHead.css.
-   Masse aus dem neuen Mock (.form-card, .form-section, .form-actions). */
+   Die Karte nutzt die ganze Breite. Ab 1280 px stehen die Abschnitte in zwei
+   Spalten, darunter (iPad, Handy) untereinander wie im neuen Mock. */
 
 .add-mode {
     margin-bottom: 14px;
 }
 
 .add-card {
-    max-width: 880px;
     padding: 25px;
 }
 
-/* Rückmeldung nach dem Speichern, über den Abschnitten */
+/* Rückmeldung nach dem Speichern (oben) und Fehler beim Speichern (über den Knöpfen) */
 .add-card > .notice {
     margin-bottom: 22px;
+}
+
+.add-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 26px 36px;
+    margin-bottom: 26px;
 }
 
 .add-section {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    margin-bottom: 26px;
+    min-width: 0;
 }
 
 .add-section-title {
     margin: 0 0 2px;
     font-size: 20px;
     letter-spacing: 0;
+}
+
+/* PC-Bildschirm: zwei Spalten, damit weniger gescrollt werden muss.
+   Mit ISBN:  links ISBN-Eingabe und Cover, rechts die Buchangaben.
+   Manuell:   links die Buchangaben, rechts das Cover. */
+@media (min-width: 1280px) {
+    .add-grid {
+        grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+        grid-template-areas: 'fields cover';
+        align-items: start;
+    }
+
+    .add-grid.has-isbn {
+        grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+        grid-template-rows: auto 1fr;
+        grid-template-areas:
+            'isbn fields'
+            'cover fields';
+    }
+
+    .add-area-isbn { grid-area: isbn; }
+    .add-area-fields { grid-area: fields; }
+    .add-area-cover { grid-area: cover; }
 }
 
 .add-actions {
@@ -49,14 +79,20 @@
     color: var(--text-muted);
 }
 
+/* Handy: weniger Rand, Knöpfe über die ganze Breite */
 @media (max-width: 700px) {
     .add-card {
         padding: 18px;
+    }
+    .add-grid {
+        gap: 22px;
+        margin-bottom: 22px;
     }
     .add-blocked {
         flex-basis: 100%;
     }
     .add-actions .btn {
         flex: 1;
+        height: 48px;
     }
 }
