@@ -1,4 +1,6 @@
-﻿/* Masse aus Erfassen-ISBN.html: Felder 44 px hoch, Beschriftung 12.5 px fett */
+﻿/* Formularfelder wie im neuen Mock (.field): Beschriftung klein und fett,
+   Eingabe mit weichem Rahmen, beim Fokus ein grüner Schein.
+   44 px Höhe, damit die Felder auf dem iPad gut zu treffen sind. */
 .field {
     display: flex;
     flex-direction: column;
@@ -12,13 +14,16 @@
 }
 
 .field-label {
-    font-size: 12.5px;
+    font-size: 12px;
     font-weight: 600;
+    color: #596254;
 }
 
 .field-input {
     height: 44px;
-    font-size: 13.5px;
+    border-color: #D9D5C8;
+    font-size: 14px;
+    color: #33483C;
 }
 
 .field-input.is-mono {
@@ -27,8 +32,8 @@
 
 textarea.field-input {
     height: auto;
-    min-height: 64px;
-    padding: 10px 12px;
+    min-height: 86px;
+    padding: 11px 12px;
     line-height: 1.45;
     resize: vertical;
 }
@@ -44,16 +49,16 @@ select.field-input:disabled {
 }
 
 .field-input:focus {
-    border-color: var(--accent);
+    border-color: #849A79;
     outline: none;
-    box-shadow: 0 0 0 1px var(--accent);
+    box-shadow: 0 0 0 3px rgba(80, 111, 79, 0.094);
 }
 
 .field-input[aria-invalid='true'] {
     border-color: var(--danger);
 }
 .field-input[aria-invalid='true']:focus {
-    box-shadow: 0 0 0 1px var(--danger);
+    box-shadow: 0 0 0 3px rgba(165, 76, 64, 0.12);
 }
 
 .field-hint {
@@ -65,4 +70,8 @@ select.field-input:disabled {
     font-size: 12px;
     font-weight: 500;
     color: var(--danger);
+}
+
+@media (max-width: 700px) {
+    .field-input { font-size: 16px; } /* verhindert Zoom beim Antippen auf dem iPhone */
 }
