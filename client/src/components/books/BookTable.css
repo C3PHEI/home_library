@@ -1,0 +1,164 @@
+﻿/* Bücherliste (BookTable.jsx) aus dem neuen Mock (.book-table).
+   Kopfzeile und Zeilen teilen sich dieselben Spalten. */
+.book-table {
+    --book-table-columns: 32px minmax(0, 2.2fr) minmax(0, 1.5fr) 56px minmax(0, 1.6fr) 34px;
+}
+
+.book-table-head,
+.book-table-row {
+    display: grid;
+    grid-template-columns: var(--book-table-columns);
+    align-items: center;
+    column-gap: 14px;
+    padding: 0 8px;
+}
+
+.book-table-head {
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--divider);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: #8C8F80;
+}
+
+/* "Titel" steht über Cover und Titel */
+.book-table-head > :first-child {
+    grid-column: 1 / 3;
+}
+
+.book-table-rows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.book-table-row {
+    position: relative;
+    min-height: 62px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--row-divider);
+    font-size: 13px;
+}
+
+.book-table-row:hover {
+    background: var(--surface-muted);
+}
+
+.book-table-title {
+    font-family: var(--serif);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.25;
+    color: var(--text);
+    overflow-wrap: anywhere;
+}
+
+.book-table-row:hover .book-table-title {
+    color: var(--accent);
+}
+
+/* Der Titel-Link deckt die ganze Zeile ab */
+.book-table-title::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+}
+
+.book-table-title:focus-visible {
+    outline: none;
+}
+
+.book-table-title:focus-visible::after {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+    border-radius: 8px;
+}
+
+.book-table-author {
+    color: #62695D;
+    overflow-wrap: anywhere;
+}
+
+.book-table-year {
+    color: #62695D;
+}
+
+.book-table-year.is-empty {
+    color: var(--text-faint);
+}
+
+/* Standort: liegt über dem Zeilen-Link und ist selbst anklickbar */
+.book-table-location {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    gap: 5px;
+    padding: 4px 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+.book-table-location:hover {
+    text-decoration: underline;
+}
+
+.book-table-location svg {
+    flex-shrink: 0;
+}
+
+.book-table-room {
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+/* Pfeil rechts: nur Zierde, geklickt wird die Zeile */
+.book-table-open {
+    width: 34px;
+    height: 34px;
+}
+
+/* iPad hochkant und Handy: keine Spalten mehr.
+   Cover links, daneben Titel / Autor · Jahr / Standort untereinander. */
+@media (max-width: 1100px) {
+    .book-table-head {
+        display: none;
+    }
+
+    .book-table-rows {
+        border-top: 1px solid var(--divider);
+    }
+
+    .book-table-row {
+        grid-template-columns: 32px auto minmax(0, 1fr) 34px;
+        grid-template-areas:
+            'cover title title open'
+            'cover author year open'
+            'cover location location open';
+        column-gap: 0;
+        row-gap: 3px;
+        padding: 12px 4px;
+    }
+
+    .book-table-row > .book-cover { grid-area: cover; align-self: start; }
+    .book-table-title { grid-area: title; margin-left: 13px; }
+    .book-table-author { grid-area: author; margin-left: 13px; font-size: 12.5px; }
+    .book-table-year { grid-area: year; font-size: 12.5px; }
+    .book-table-location { grid-area: location; margin-left: 13px; }
+    .book-table-open { grid-area: open; }
+
+    /* "Delia Owens · 2019" */
+    .book-table-year::before {
+        content: '·';
+        margin: 0 6px;
+    }
+
+    .book-table-year.is-empty {
+        display: none;
+    }
+}
