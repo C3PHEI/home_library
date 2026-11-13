@@ -11,7 +11,7 @@
     color: var(--accent);
 }
 
-/* Sortierung links, Ansicht rechts */
+/* Sortierung und Bücher pro Seite links, Ansicht rechts */
 .slot-tools {
     display: flex;
     align-items: center;
@@ -19,6 +19,14 @@
     flex-wrap: wrap;
     gap: 12px;
     margin: 0 0 20px;
+}
+
+/* Die beiden Auswahlfelder nebeneinander, auf schmalen Bildschirmen untereinander */
+.slot-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 22px;
 }
 
 .slot-sort {

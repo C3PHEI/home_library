@@ -18,11 +18,13 @@ const SORT_OPTIONS = [
     { value: 'created', label: 'Erfassungsdatum' },
 ]
 const DEFAULT_SORT = 'title'
-const PAGE_SIZE = 12
+// Bücher pro Seite. Das Backend liefert höchstens 100 auf einmal.
+const PAGE_SIZES = [12, 24, 48, 100]
+const DEFAULT_PAGE_SIZE = 12
 
 // Ein Fach (Reihe, Ablage) mit seinen Büchern: /regal/:slotId
 // Sortierung und Seite stehen in der URL (?sort=author&page=2),
-// die Ansicht (Cover oder Liste) merkt sich der Browser.
+// die Ansicht (Cover oder Liste) und die Anzahl Bücher pro Seite merkt sich der Browser.
 export default function SlotPage() {
     const slotId = Number(useParams().slotId)
     const location = useLocation()
@@ -30,11 +32,14 @@ export default function SlotPage() {
     const sort = parseSort(searchParams.get('sort'))
     const page = parsePage(searchParams.get('page'))
     const [view, setView] = useStoredState('bibliothek.reihe.ansicht', 'tiles')
+    // Gilt für beide Ansichten (Cover und Liste)
+    const [storedPageSize, setPageSize] = useStoredState('bibliothek.reihe.proSeite', DEFAULT_PAGE_SIZE)
+    const pageSize = PAGE_SIZES.includes(storedPageSize) ? storedPageSize : DEFAULT_PAGE_SIZE
 
     const loadSlot = useCallback((options) => getSlot(slotId, options), [slotId])
     const loadBooks = useCallback(
-        (options) => getSlotBooks(slotId, { sort, page, limit: PAGE_SIZE }, options),
-        [slotId, sort, page],
+        (options) => getSlotBooks(slotId, { sort, page, limit: pageSize }, options),
+        [slotId, sort, page, pageSize],
     )
     const slot = useApi(loadSlot)
     const books = useApi(loadBooks)
@@ -43,14 +48,14 @@ export default function SlotPage() {
     const header = slot.data?.id === slotId ? slot.data : null
     const list = books.data?.slotId === slotId ? books.data : null
 
-    // Nach Seiten- oder Sortierwechsel wieder oben beginnen
-    const lastListKey = useRef(`${page}|${sort}`)
+    // Nach Seiten-, Sortier- oder Anzahlwechsel wieder oben beginnen
+    const listKey = `${page}|${sort}|${pageSize}`
+    const lastListKey = useRef(listKey)
     useEffect(() => {
-        const listKey = `${page}|${sort}`
         if (lastListKey.current === listKey) return // erster Aufruf (auch doppelt im StrictMode)
         lastListKey.current = listKey
         window.scrollTo({ top: 0 })
-    }, [page, sort])
+    }, [listKey])
 
     function updateParams(changes) {
         setSearchParams(
@@ -69,6 +74,12 @@ export default function SlotPage() {
     function handleSortChange(event) {
         const value = event.target.value
         updateParams({ sort: value === DEFAULT_SORT ? null : value, page: null })
+    }
+
+    // Andere Anzahl pro Seite: wieder bei Seite 1 beginnen
+    function handlePageSizeChange(event) {
+        setPageSize(Number(event.target.value))
+        updateParams({ page: null })
     }
 
     function handlePageChange(nextPage) {
@@ -126,15 +137,33 @@ export default function SlotPage() {
 
             {total > 0 && (
                 <div className="slot-tools">
-                    <div className="slot-sort">
-                        <label htmlFor="slot-sort">Sortieren nach</label>
-                        <select id="slot-sort" className="select" value={sort} onChange={handleSortChange}>
-                            {SORT_OPTIONS.map((option) => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
-                                </option>
-                            ))}
-                        </select>
+                    <div className="slot-filters">
+                        <div className="slot-sort">
+                            <label htmlFor="slot-sort">Sortieren nach</label>
+                            <select id="slot-sort" className="select" value={sort} onChange={handleSortChange}>
+                                {SORT_OPTIONS.map((option) => (
+                                    <option key={option.value} value={option.value}>
+                                        {option.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="slot-sort">
+                            <label htmlFor="slot-page-size">Bücher pro Seite</label>
+                            <select
+                                id="slot-page-size"
+                                className="select"
+                                value={pageSize}
+                                onChange={handlePageSizeChange}
+                            >
+                                {PAGE_SIZES.map((size) => (
+                                    <option key={size} value={size}>
+                                        {size}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
 
                     <div className="view-toggle" role="group" aria-label="Ansicht">
