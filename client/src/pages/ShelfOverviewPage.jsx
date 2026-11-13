@@ -13,6 +13,9 @@ import EditActions from '../components/shelf/EditActions.jsx'
 import RoomIcon from '../components/shelf/RoomIcon.jsx'
 import RenameDialog from '../components/shelf/RenameDialog.jsx'
 import DeleteDialog from '../components/shelf/DeleteDialog.jsx'
+import { ArrowUpRight, BookOpen, Check, Library, MapPin, Pencil, Plus } from 'lucide-react'
+import AddFurnitureDialog from '../components/shelf/AddFurnitureDialog.jsx'
+import AddSlotDialog from '../components/shelf/AddSlotDialog.jsx'
 import './ShelfOverviewPage.css'
 
 // Startseite: Zahlen oben, darunter alle Räume mit ihren Möbeln.
@@ -46,9 +49,16 @@ export default function ShelfOverviewPage() {
         setDialog({ kind, target })
     }
 
-    function handleDone(message) {
+    function handleAddFurniture() {
+        setDoneMessage(null)
+        setDialog({ kind: 'addFurniture' })
+    }
+
+    // openFurnitureId: dieses Möbel aufklappen, damit die neuen Fächer gleich zu sehen sind
+    function handleDone(message, openFurnitureId) {
         setDialog(null)
         setDoneMessage(message)
+        if (openFurnitureId) setOpenId(openFurnitureId)
         reload()
     }
 
@@ -87,6 +97,15 @@ export default function ShelfOverviewPage() {
                             <h2>Wo stehen unsere Bücher?</h2>
                         </div>
                         <div className="section-tools">
+                            <button type="button" className="btn btn-outline btn-small" onClick={handleAddFurniture}>
+                                <Plus size={15} aria-hidden="true" />
+                                Möbelstück hinzufügen
+                            </button>
+                            <Notice variant="info" title="Ändern, ergänzen oder löschen">
+                                Plus: neues Fach im Möbelstück. Stift: Namen ändern.
+                                Papierkorb: Raum, Möbelstück oder Fach löschen.
+                                Bücher bleiben dabei immer erhalten.
+                            </Notice>
                             {data.rooms.length > 0 && (
                                 <button
                                     type="button"
@@ -137,6 +156,12 @@ export default function ShelfOverviewPage() {
                 </>
             )}
 
+            {dialog?.kind === 'addFurniture' && data && (
+                <AddFurnitureDialog rooms={data.rooms} onClose={() => setDialog(null)} onDone={handleDone} />
+            )}
+            {dialog?.kind === 'addSlot' && (
+                <AddSlotDialog furniture={dialog.target} onClose={() => setDialog(null)} onDone={handleDone} />
+            )}
             {dialog?.kind === 'rename' && (
                 <RenameDialog target={dialog.target} onClose={() => setDialog(null)} onDone={handleDone} />
             )}

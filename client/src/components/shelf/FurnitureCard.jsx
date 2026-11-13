@@ -19,6 +19,7 @@ export default function FurnitureCard({ furniture, open, onToggle, editing = fal
     const actions = editing && (
         <EditActions
             name={furniture.name}
+            onAdd={() => onEdit('addSlot', furniture)}
             onRename={() => onEdit('rename', furnitureTarget(furniture))}
             onDelete={() => onEdit('delete', furnitureTarget(furniture))}
         />
