@@ -1,0 +1,40 @@
+﻿/* Dialog "Möbelstück hinzufügen" (AddFurnitureDialog.jsx) */
+
+/* Raum und Art nebeneinander, Namen über die ganze Breite (.field-wide) */
+.add-furniture-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 12px;
+}
+
+/* Abgesetzter Block "Fächer anlegen" */
+.add-furniture-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid #E8E2D6;
+    border-radius: var(--radius);
+    background: var(--surface-muted);
+}
+
+.add-furniture-slots-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 12px;
+}
+
+.add-furniture-count {
+    max-width: 120px;
+}
+
+@media (max-width: 520px) {
+    .add-furniture-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .add-furniture-slots-head .segmented {
+        width: 100%;
+    }
+}
