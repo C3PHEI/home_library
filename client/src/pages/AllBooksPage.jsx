@@ -15,7 +15,6 @@ const SORT_OPTIONS = [
     { value: 'title', label: 'Titel', dir: 'asc' },
     { value: 'author', label: 'Autor', dir: 'asc' },
     { value: 'year', label: 'Jahr', dir: 'desc' },
-    { value: 'created', label: 'Hinzugefügt', dir: 'desc' },
 ]
 const DEFAULT_SORT = 'title'
 // Bücher pro Seite. Das Backend liefert höchstens 100 auf einmal.
@@ -33,6 +32,7 @@ export default function AllBooksPage() {
     const location = useLocation()
     const [searchParams, setSearchParams] = useSearchParams()
     const sort = parseSort(searchParams.get('sort'))
+    const dir = parseDir(searchParams.get('dir'), sort)
     const page = parsePage(searchParams.get('page'))
     const language = searchParams.get('language') ?? ''
     const author = searchParams.get('author') ?? ''
@@ -42,12 +42,10 @@ export default function AllBooksPage() {
     const pageSize = PAGE_SIZES.includes(storedPageSize) ? storedPageSize : DEFAULT_PAGE_SIZE
 
     const loadBooks = useCallback(
-        (options) => {
-            const dir = SORT_OPTIONS.find((option) => option.value === sort).dir
-            return getBooks({ sort, dir, page, limit: pageSize, language, author, year }, options)
-        },
-        [sort, page, pageSize, language, author, year],
+        (options) => getBooks({ sort, dir, page, limit: pageSize, language, author, year }, options),
+        [sort, dir, page, pageSize, language, author, year],
     )
+
     const books = useApi(loadBooks)
     const filters = useApi(getBookFilters)
     const totals = useApi(loadTotal)
@@ -56,7 +54,7 @@ export default function AllBooksPage() {
     const totalAll = totals.data?.total ?? null
 
     // Nach Seiten-, Sortier- oder Filterwechsel wieder oben beginnen
-    const listKey = `${page}|${sort}|${pageSize}|${language}|${author}|${year}`
+    const listKey = `${page}|${sort}|${dir}|${pageSize}|${language}|${author}|${year}`
     const lastListKey = useRef(listKey)
     useEffect(() => {
         if (lastListKey.current === listKey) return // erster Aufruf (auch doppelt im StrictMode)
@@ -84,9 +82,26 @@ export default function AllBooksPage() {
         updateParams({ page: null })
     }
 
+    // Die Richtung steht nur in der URL, wenn sie vom Normalfall der Spalte abweicht
+    function applySort(nextSort, nextDir) {
+        updateParams({
+            sort: nextSort === DEFAULT_SORT ? null : nextSort,
+            dir: nextDir === defaultDir(nextSort) ? null : nextDir,
+            page: null,
+        })
+    }
+
+    // Dropdown: immer mit der üblichen Richtung der Spalte beginnen
     function handleSortChange(event) {
         const value = event.target.value
-        updateParams({ sort: value === DEFAULT_SORT ? null : value, page: null })
+        applySort(value, defaultDir(value))
+    }
+
+    // Klick auf einen Spaltenkopf: gleiche Spalte dreht die Richtung um,
+    // eine andere Spalte beginnt mit ihrer üblichen Richtung
+    function handleColumnSort(column) {
+        if (column === sort) applySort(column, dir === 'asc' ? 'desc' : 'asc')
+        else applySort(column, defaultDir(column))
     }
 
     // Neuer Filter: wieder bei Seite 1 beginnen
@@ -235,7 +250,7 @@ export default function AllBooksPage() {
 
                 {list && list.items.length > 0 && (
                     <div className={books.loading ? 'all-books-list is-loading' : 'all-books-list'}>
-                        <BookTable books={list.items} from={from} />
+                        <BookTable books={list.items} from={from} sort={sort} dir={dir} onSort={handleColumnSort} />
 
                         <Pagination
                             page={page}
@@ -306,6 +321,15 @@ function filterOptions(entries, selected) {
 
 function parseSort(value) {
     return SORT_OPTIONS.some((option) => option.value === value) ? value : DEFAULT_SORT
+}
+
+function defaultDir(sort) {
+    return SORT_OPTIONS.find((option) => option.value === sort).dir
+}
+
+// ?dir=desc -> 'desc', fehlt oder ungültig -> übliche Richtung der Spalte
+function parseDir(value, sort) {
+    return value === 'asc' || value === 'desc' ? value : defaultDir(sort)
 }
 
 function parsePage(value) {
