@@ -45,10 +45,10 @@ function parseMoveTo(query = {}) {
 
 // 'sofa' -> 'sofa', null oder '' -> null (zurück zum Standard-Icon)
 // allowed: FURNITURE_ICONS oder ROOM_ICONS
-function parseIcon(value, allowed) {
+function parseIcon(value, allowed, field = 'icon') {
     if (value === null || value === '') return null
     if (typeof value !== 'string' || !allowed.has(value)) {
-        throw new ValidationError({ icon: 'Unbekanntes Symbol' })
+        throw new ValidationError({ [field]: 'Unbekanntes Symbol' })
     }
     return value
 }
@@ -111,12 +111,17 @@ export async function createFurniture(body = {}) {
     }
     const name = cleanName(body.name, 'name')
     const icon = body.icon === undefined ? null : parseIcon(body.icon, FURNITURE_ICONS)
+    const roomIcon = body.roomIcon === undefined ? undefined : parseIcon(body.roomIcon, ROOM_ICONS, 'roomIcon')
     const labels = parseSlotLabels(body)
 
     try {
         return await withTransaction(async (client) => {
             // "wohnzimmer" landet im bestehenden Raum "Wohnzimmer"
-            const room = (await structureRepository.findRoomName(client, roomInput)) ?? roomInput
+            const existingRoom = await structureRepository.findRoomName(client, roomInput)
+            const room = existingRoom ?? roomInput
+            if (existingRoom === null && roomIcon !== undefined) {
+                await structureRepository.setRoomIcon(client, room, roomIcon)
+            }
             const furniture = await structureRepository.insertFurniture(client, {
                 name, type: body.type, room, icon,
             })
