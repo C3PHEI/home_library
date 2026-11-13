@@ -1,7 +1,7 @@
 ﻿/* Bücherliste (BookTable.jsx) aus dem neuen Mock (.book-table).
    Kopfzeile und Zeilen teilen sich dieselben Spalten. */
 .book-table {
-    --book-table-columns: 32px minmax(0, 2.2fr) minmax(0, 1.5fr) 56px minmax(0, 1.6fr) 34px;
+    --book-table-columns: 32px minmax(0, 2.2fr) minmax(0, 1.5fr) 64px minmax(0, 1.6fr) 34px;
 }
 
 .book-table-head,
@@ -21,6 +21,47 @@
     letter-spacing: 1.2px;
     text-transform: uppercase;
     color: #8C8F80;
+}
+
+/* Spaltenkopf zum Sortieren: sieht aus wie der Text daneben, mit Pfeil dahinter */
+.book-table-sort {
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    gap: 5px;
+    margin: -6px -6px;
+    padding: 6px 6px;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    color: inherit;
+    cursor: pointer;
+}
+
+.book-table-sort:hover,
+.book-table-sort.is-active {
+    color: var(--accent);
+}
+
+.book-table-sort:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+}
+
+.book-table-sort svg {
+    flex-shrink: 0;
+}
+
+/* Nicht gewählte Spalte: Doppelpfeil nur angedeutet */
+.book-table-sort:not(.is-active) svg {
+    opacity: 0.45;
+}
+
+.book-table-sort:hover svg {
+    opacity: 1;
 }
 
 /* "Titel" steht über Cover und Titel */
