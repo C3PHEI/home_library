@@ -29,3 +29,10 @@ export function updateFurniture(id, changes) {
 export function deleteFurniture(id, moveTo) {
     return apiSend('DELETE', `/furniture/${id}${moveToQuery(moveTo)}`)
 }
+
+// POST /api/furniture -> { id, name, type, room, icon, slots: [{ id, label, bookCount }] }
+// data: { room, type, name, slotCount } oder statt slotCount: slotLabels: ['Oben', 'Unten']
+// Gibt es den Raum noch nicht, entsteht er mit dem Möbelstück.
+export function createFurniture(data) {
+    return apiSend('POST', '/furniture', data)
+}

@@ -21,3 +21,9 @@ export function renameSlot(slotId, label) {
 export function deleteSlot(slotId, moveTo) {
     return apiSend('DELETE', `/slots/${slotId}${moveTo ? `?moveTo=${moveTo}` : ''}`)
 }
+
+// POST /api/furniture/:id/slots -> { id, label, furnitureId, bookCount }
+// Neues Fach am Ende eines Möbelstücks
+export function createSlot(furnitureId, label) {
+    return apiSend('POST', `/furniture/${furnitureId}/slots`, { label })
+}
