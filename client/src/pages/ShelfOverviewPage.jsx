@@ -1,6 +1,6 @@
 ﻿import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowUpRight, BookOpen, Check, Library, MapPin, Pencil } from 'lucide-react'
+import { ArrowUpRight, BookOpen, Check, Library, MapPin, Pencil, Plus } from 'lucide-react'
 import { getLocations } from '../api/locations.js'
 import { useApi } from '../hooks/useApi.js'
 import { useStoredState } from '../hooks/useStoredState.js'
@@ -13,7 +13,6 @@ import EditActions from '../components/shelf/EditActions.jsx'
 import RoomIcon from '../components/shelf/RoomIcon.jsx'
 import RenameDialog from '../components/shelf/RenameDialog.jsx'
 import DeleteDialog from '../components/shelf/DeleteDialog.jsx'
-import { ArrowUpRight, BookOpen, Check, Library, MapPin, Pencil, Plus } from 'lucide-react'
 import AddFurnitureDialog from '../components/shelf/AddFurnitureDialog.jsx'
 import AddSlotDialog from '../components/shelf/AddSlotDialog.jsx'
 import './ShelfOverviewPage.css'
@@ -101,11 +100,6 @@ export default function ShelfOverviewPage() {
                                 <Plus size={15} aria-hidden="true" />
                                 Möbelstück hinzufügen
                             </button>
-                            <Notice variant="info" title="Ändern, ergänzen oder löschen">
-                                Plus: neues Fach im Möbelstück. Stift: Namen ändern.
-                                Papierkorb: Raum, Möbelstück oder Fach löschen.
-                                Bücher bleiben dabei immer erhalten.
-                            </Notice>
                             {data.rooms.length > 0 && (
                                 <button
                                     type="button"
@@ -126,6 +120,19 @@ export default function ShelfOverviewPage() {
                             </Link>
                         </div>
                     </div>
+
+                    {(editing || doneMessage) && (
+                        <div className="overview-notices">
+                            {editing && (
+                                <Notice variant="info" title="Ändern, ergänzen oder löschen">
+                                    Plus: neues Fach im Möbelstück. Stift: Namen ändern.
+                                    Papierkorb: Raum, Möbelstück oder Fach löschen.
+                                    Bücher bleiben dabei immer erhalten.
+                                </Notice>
+                            )}
+                            {doneMessage && <Notice variant="success" title={doneMessage} />}
+                        </div>
+                    )}
 
                     {(editing || doneMessage) && (
                         <div className="overview-notices">
