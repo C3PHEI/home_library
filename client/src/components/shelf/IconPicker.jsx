@@ -3,13 +3,12 @@
 // Auswahl eines Icons. Echte Radio-Buttons (versteckt), damit
 // Tastatur (Pfeiltasten) und Screenreader wie gewohnt funktionieren.
 // icons: FURNITURE_ICONS oder ROOM_ICONS aus utils/icons.js
-export default function IconPicker({ icons, value, onChange, disabled = false }) {
+export default function IconPicker({ icons, value, onChange, disabled = false, label = 'Symbol' }) {
     const selected = icons.find((entry) => entry.key === value)
 
     return (
         <fieldset className="icon-picker" disabled={disabled}>
-            <legend className="field-label">Symbol</legend>
-
+            <legend className="field-label">{label}</legend>
             <div className="icon-grid">
                 {icons.map(({ key, label, Icon }) => (
                     <label key={key} className="icon-option" title={label}>

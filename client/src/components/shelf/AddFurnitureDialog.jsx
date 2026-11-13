@@ -5,7 +5,8 @@ import Notice from '../Notice.jsx'
 import Segmented from '../Segmented.jsx'
 import { createFurniture } from '../../api/locations.js'
 import { FURNITURE_TYPES } from '../../utils/furniture.js'
-import { furnitureIconEntry, furnitureIconKey } from '../../utils/icons.js'
+import IconPicker from './IconPicker.jsx'
+import { ROOM_ICONS, furnitureIconEntry, furnitureIconKey, roomIconKey } from '../../utils/icons.js'
 import { plural } from '../../utils/format.js'
 import './AddFurnitureDialog.css'
 
@@ -32,6 +33,7 @@ export default function AddFurnitureDialog({ rooms, onClose, onDone }) {
 
     const [roomChoice, setRoomChoice] = useState(roomNames[0] ?? NEW_ROOM)
     const [newRoom, setNewRoom] = useState('')
+    const [roomIcon, setRoomIcon] = useState(null)
     const [type, setType] = useState('shelf')
     const [name, setName] = useState('')
     const [mode, setMode] = useState('count')
@@ -42,6 +44,7 @@ export default function AddFurnitureDialog({ rooms, onClose, onDone }) {
     const [busy, setBusy] = useState(false)
 
     const isNewRoom = roomChoice === NEW_ROOM
+    const roomIconValue = roomIcon ?? roomIconKey({ room: newRoom, icon: null })
     const countValue = count ?? String(defaultCount(type))
 
     function clearError(field) {
@@ -58,6 +61,7 @@ export default function AddFurnitureDialog({ rooms, onClose, onDone }) {
         if (furnitureName === '') found.name = 'Bitte einen Namen eingeben'
 
         const data = { room, type, name: furnitureName }
+        if (isNewRoom) data.roomIcon = roomIconValue
         if (mode === 'count') {
             const number = Number(countValue)
             if (countValue.trim() === '' || !Number.isInteger(number) || number < 1 || number > MAX_SLOTS) {
@@ -177,6 +181,18 @@ export default function AddFurnitureDialog({ rooms, onClose, onDone }) {
                             />
                         )}
                     </Field>
+                )}
+
+                {isNewRoom && (
+                    <div className="field-wide">
+                        <IconPicker
+                            icons={ROOM_ICONS}
+                            value={roomIconValue}
+                            onChange={setRoomIcon}
+                            disabled={busy}
+                            label="Symbol des neuen Raums"
+                        />
+                    </div>
                 )}
 
                 <Field id="add-furniture-name" label="Name des Möbelstücks" error={errors.name} wide>
