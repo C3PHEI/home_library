@@ -1,6 +1,6 @@
-﻿import { useCallback, useEffect, useRef } from 'react'
+﻿import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, BookOpen, ChevronRight, LayoutGrid, List } from 'lucide-react'
+import { ArrowLeft, BookOpen, ChevronRight, LayoutGrid, List, Search, X } from 'lucide-react'
 import { getSlot, getSlotBooks } from '../api/slots.js'
 import { useApi } from '../hooks/useApi.js'
 import { useStoredState } from '../hooks/useStoredState.js'
@@ -21,9 +21,11 @@ const DEFAULT_SORT = 'title'
 // Bücher pro Seite. Das Backend liefert höchstens 100 auf einmal.
 const PAGE_SIZES = [12, 24, 48, 100]
 const DEFAULT_PAGE_SIZE = 12
+// So lange nach dem letzten Tastendruck warten, bevor gesucht wird
+const SEARCH_DELAY_MS = 250
 
 // Ein Fach (Reihe, Ablage) mit seinen Büchern: /regal/:slotId
-// Sortierung und Seite stehen in der URL (?sort=author&page=2),
+// Sortierung, Seite und Titelsuche stehen in der URL (?sort=author&page=2&q=ab),
 // die Ansicht (Cover oder Liste) und die Anzahl Bücher pro Seite merkt sich der Browser.
 export default function SlotPage() {
     const slotId = Number(useParams().slotId)
@@ -31,6 +33,7 @@ export default function SlotPage() {
     const [searchParams, setSearchParams] = useSearchParams()
     const sort = parseSort(searchParams.get('sort'))
     const page = parsePage(searchParams.get('page'))
+    const q = (searchParams.get('q') ?? '').trim()
     const [view, setView] = useStoredState('bibliothek.reihe.ansicht', 'tiles')
     // Gilt für beide Ansichten (Cover und Liste)
     const [storedPageSize, setPageSize] = useStoredState('bibliothek.reihe.proSeite', DEFAULT_PAGE_SIZE)
@@ -38,8 +41,8 @@ export default function SlotPage() {
 
     const loadSlot = useCallback((options) => getSlot(slotId, options), [slotId])
     const loadBooks = useCallback(
-        (options) => getSlotBooks(slotId, { sort, page, limit: pageSize }, options),
-        [slotId, sort, page, pageSize],
+        (options) => getSlotBooks(slotId, { sort, page, limit: pageSize, q }, options),
+        [slotId, sort, page, pageSize, q],
     )
     const slot = useApi(loadSlot)
     const books = useApi(loadBooks)
@@ -56,6 +59,29 @@ export default function SlotPage() {
         lastListKey.current = listKey
         window.scrollTo({ top: 0 })
     }, [listKey])
+
+    // Suchfeld: tippt sofort, die Suche (URL + Abruf) folgt kurz danach
+    const [searchInput, setSearchInput] = useState(q)
+
+    // Anderes Fach geöffnet: Suchfeld wieder aus der URL übernehmen
+    const [searchSlotId, setSearchSlotId] = useState(slotId)
+    if (searchSlotId !== slotId) {
+        setSearchSlotId(slotId)
+        setSearchInput(q)
+    }
+
+    useEffect(() => {
+        const next = searchInput.trim()
+        if (next === q) return
+        const timer = setTimeout(() => updateParams({ q: next || null, page: null }), SEARCH_DELAY_MS)
+        return () => clearTimeout(timer)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchInput, q])
+
+    function clearSearch() {
+        setSearchInput('')
+        updateParams({ q: null, page: null })
+    }
 
     function updateParams(changes) {
         setSearchParams(
@@ -115,7 +141,10 @@ export default function SlotPage() {
     }
 
     const from = location.pathname + location.search
+    // total = Treffer (mit Suche), slotTotal = alle Bücher im Fach
     const total = list?.total ?? header?.bookCount ?? 0
+    const slotTotal = header?.bookCount ?? total
+    const searching = q !== ''
     const pageMissing = list && list.total > 0 && list.items.length === 0
     const addLink = `/erfassen?slot=${slotId}`
 
@@ -126,7 +155,7 @@ export default function SlotPage() {
             <PageHead
                 eyebrow={header?.room ?? 'Standort'}
                 title={header ? header.furniture.name : 'Fach wird geladen …'}
-                lead={header ? leadText(header, total) : null}
+                lead={header ? leadText(header, slotTotal) : null}
                 actions={
                     <Link to={addLink} className="btn btn-secondary">
                         <BookOpen size={16} aria-hidden="true" />
@@ -135,9 +164,39 @@ export default function SlotPage() {
                 }
             />
 
-            {total > 0 && (
+            {(slotTotal > 0 || searching) && (
                 <div className="slot-tools">
                     <div className="slot-filters">
+                        <div className="slot-search">
+                            <Search size={16} className="slot-search-icon" aria-hidden="true" />
+                            <label htmlFor="slot-search" className="visually-hidden">Titel in diesem Fach suchen</label>
+                            <input
+                                id="slot-search"
+                                type="text"
+                                inputMode="search"
+                                enterKeyHint="search"
+                                autoComplete="off"
+                                className="input slot-search-input"
+                                placeholder="Titel suchen …"
+                                value={searchInput}
+                                onChange={(event) => setSearchInput(event.target.value)}
+                                onKeyDown={(event) => {
+                                    if (event.key === 'Escape' && searchInput) clearSearch()
+                                }}
+                            />
+                            {searchInput && (
+                                <button
+                                    type="button"
+                                    className="slot-search-clear"
+                                    onClick={clearSearch}
+                                    title="Suche löschen"
+                                >
+                                    <X size={15} aria-hidden="true" />
+                                    <span className="visually-hidden">Suche löschen</span>
+                                </button>
+                            )}
+                        </div>
+
                         <div className="slot-sort">
                             <label htmlFor="slot-sort">Sortieren nach</label>
                             <select id="slot-sort" className="select" value={sort} onChange={handleSortChange}>
@@ -202,7 +261,17 @@ export default function SlotPage() {
 
             {!list && !books.error && <p className="state-message">Bücher werden geladen …</p>}
 
-            {list && list.total === 0 && (
+            {list && list.total === 0 && searching && (
+                <div className="slot-empty" role="status">
+                    <Search size={23} aria-hidden="true" />
+                    <p>Kein Buch in diesem Fach mit «{q}» im Titel.</p>
+                    <button type="button" className="btn btn-secondary" onClick={clearSearch}>
+                        Suche löschen
+                    </button>
+                </div>
+            )}
+
+            {list && list.total === 0 && !searching && (
                 <div className="slot-empty">
                     <BookOpen size={23} aria-hidden="true" />
                     <p>Hier ist noch Platz für ein gutes Buch.</p>

@@ -5,10 +5,12 @@ export function getSlot(slotId, options) {
     return apiGet(`/slots/${slotId}`, options)
 }
 
-// GET /api/slots/:id/books?sort=title&page=1&limit=12
-// -> { slotId, sort, page, limit, total, totalPages, from, to, items: [...] }
-export function getSlotBooks(slotId, { sort, page, limit }, options) {
+// GET /api/slots/:id/books?sort=title&page=1&limit=12&q=ab
+// -> { slotId, sort, q, page, limit, total, totalPages, from, to, items: [...] }
+// q (optional): nur Bücher, deren Titel diesen Text enthält
+export function getSlotBooks(slotId, { sort, page, limit, q }, options) {
     const params = new URLSearchParams({ sort, page: String(page), limit: String(limit) })
+    if (q) params.set('q', q)
     return apiGet(`/slots/${slotId}/books?${params}`, options)
 }
 

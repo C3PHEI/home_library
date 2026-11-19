@@ -29,6 +29,55 @@
     gap: 12px 22px;
 }
 
+/* Titelsuche: Lupe links im Feld, Löschen-Kreuz rechts */
+.slot-search {
+    position: relative;
+    flex: 0 1 280px;
+    min-width: 200px;
+}
+
+.slot-search-icon {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    color: var(--text-faint);
+    pointer-events: none;
+}
+
+.slot-search-input {
+    padding-left: 36px;
+    padding-right: 36px;
+}
+
+.slot-search-clear {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    transform: translateY(-50%);
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+.slot-search-clear:hover {
+    background: var(--surface-muted);
+    color: var(--text);
+}
+
+/* Handy: Suchfeld über die ganze Breite */
+@media (max-width: 640px) {
+    .slot-search {
+        flex-basis: 100%;
+    }
+}
+
 .slot-sort {
     display: flex;
     align-items: center;
