@@ -5,6 +5,7 @@ import { toSlotHeaderDto, toBookListItemDto } from "../mappers/slots.mapper.js";
 const ALLOWED_SORTS = ["title", "author", "year", "created"];
 const DEFAULT_LIMIT = 12;
 const MAX_LIMIT = 100;
+const MAX_QUERY_LENGTH = 200;
 
 // ---------------------------------------------------------------------------
 // Helper function
@@ -40,7 +41,8 @@ export async function getSlotHeader(shelfId) {
 }
 
 // ---------------------------------------------------------------------------
-// GET /api/slots/:id/books?sort=title&page=1&limit=12
+// GET /api/slots/:id/books?sort=title&page=1&limit=12&q=ab
+// q (optional): nur Bücher, deren Titel diesen Text enthält
 // ---------------------------------------------------------------------------
 
 export async function getSlotBooks(shelfId, query = {}) {
@@ -54,11 +56,16 @@ export async function getSlotBooks(shelfId, query = {}) {
     const page = parsePositiveInt(query.page, 1, "page");
     const limit = Math.min(parsePositiveInt(query.limit, DEFAULT_LIMIT, "limit"), MAX_LIMIT);
 
+    const q = typeof query.q === "string" ? query.q.trim() : "";
+    if (q.length > MAX_QUERY_LENGTH) {
+        throw new ValidationError({ q: `Höchstens ${MAX_QUERY_LENGTH} Zeichen` })
+    }
+
     const offset = (page - 1) * limit;
 
     const [total, rows] = await Promise.all([
-        slotsRepository.countBooks(shelfId),
-        slotsRepository.findBooks(shelfId, sort, limit, offset),
+        slotsRepository.countBooks(shelfId, q || null),
+        slotsRepository.findBooks(shelfId, sort, limit, offset, q || null),
     ]);
 
     if (total === 0) {
@@ -73,6 +80,7 @@ export async function getSlotBooks(shelfId, query = {}) {
     return {
         slotId: shelfId,
         sort,
+        q,
         page,
         limit,
         total,

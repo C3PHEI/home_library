@@ -26,12 +26,40 @@ const SORT_COLUMNS = {
     created: 'created_at',
 };
 
-export async function countBooks(slotId) {
+// Titelsuche: Teilwort irgendwo im Titel (Anfang, Mitte, Ende),
+// ohne Gross/Klein und ohne Akzente ("ecole" findet "École").
+// % und _ im Suchtext werden maskiert, damit sie als normale Zeichen gelten.
+// $2 ist NULL, wenn nicht gesucht wird -> alle Bücher des Fachs.
+const TITLE_FILTER = `
+    AND ($2::text IS NULL
+         OR f_unaccent(lower(title)) LIKE '%' || f_unaccent(lower($2::text)) || '%')`;
+
+function toLikeParam(titleQuery) {
+    return titleQuery ? titleQuery.replace(/[\\%_]/g, '\\$&') : null;
+}
+
+export async function countBooks(slotId, titleQuery = null) {
     const { rows } = await pool.query(
-        'SELECT count(*)::int AS total FROM book WHERE shelf_slot_id = $1',
-        [slotId]
+        `SELECT count(*)::int AS total
+           FROM book
+          WHERE shelf_slot_id = $1 ${TITLE_FILTER}`,
+        [slotId, toLikeParam(titleQuery)]
     );
     return rows[0].total;
+}
+
+export async function findBooks(slotId, sort, limit, offset, titleQuery = null) {
+    const orderBy = SORT_COLUMNS[sort] ?? SORT_COLUMNS.title;
+
+    const { rows } = await pool.query(
+        `SELECT id, title, author, published_year, language, isbn13, cover_path, loaned_to
+       FROM book
+      WHERE shelf_slot_id = $1 ${TITLE_FILTER}
+      ORDER BY ${orderBy}, id
+      LIMIT $3 OFFSET $4`,
+        [slotId, toLikeParam(titleQuery), limit, offset]
+    );
+    return rows;
 }
 
 export async function findBooks(slotId, sort, limit, offset) {
